@@ -7,60 +7,79 @@
     android:background="@drawable/backg"
     tools:context=".MainActivity">
 
-    <Button
-        android:id="@+id/button"
-        android:layout_width="207dp"
-        android:layout_height="48dp"
-        android:layout_marginStart="77dp"
-        android:layout_marginTop="12dp"
-        android:layout_marginEnd="76dp"
-        android:autoText="true"
-        android:text="Open Camera"
-        android:textAppearance="@style/TextAppearance.AppCompat.Body2"
-        app:icon="@drawable/ic_camera"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/imageView" />
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/backg"
+        tools:context=".MainActivity">
 
-    <ImageView
-        android:id="@+id/imageView"
-        android:layout_width="331dp"
-        android:layout_height="269dp"
-        android:layout_marginStart="13dp"
-        android:layout_marginTop="92dp"
-        android:layout_marginEnd="16dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/logo" />
+        <Button
+            android:id="@+id/openCameraButton"
+            android:layout_width="207dp"
+            android:layout_height="48dp"
+            android:layout_marginStart="77dp"
+            android:layout_marginTop="12dp"
+            android:layout_marginEnd="76dp"
+            android:autoText="true"
+            android:text="Open Camera"
+            android:textAppearance="@style/TextAppearance.AppCompat.Body2"
+            android:textSize="18sp"
+            app:icon="@drawable/ic_camera"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/imageView" />
 
-    <Button
-        android:id="@+id/button4"
-        android:layout_width="207dp"
-        android:layout_height="48dp"
-        android:layout_marginStart="77dp"
-        android:layout_marginTop="20dp"
-        android:layout_marginEnd="76dp"
-        android:autoText="true"
-        android:text="Edit from Gallery"
-        android:textAppearance="@style/TextAppearance.AppCompat.Body2"
-        app:icon="@android:drawable/ic_dialog_dialer"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/button" />
+        <ImageView
+            android:id="@+id/imageView"
+            android:layout_width="331dp"
+            android:layout_height="269dp"
+            android:layout_marginStart="13dp"
+            android:layout_marginTop="92dp"
+            android:layout_marginEnd="16dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/logo" />
 
-    <Button
-        android:id="@+id/button5"
-        android:layout_width="207dp"
-        android:layout_height="48dp"
-        android:layout_marginStart="77dp"
-        android:layout_marginTop="16dp"
-        android:layout_marginEnd="76dp"
-        android:autoText="true"
-        android:text="Saved Objects"
-        android:textAppearance="@style/TextAppearance.AppCompat.Body2"
-        app:icon="?attr/actionModeCopyDrawable"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/button4" />
+        <Button
+            android:id="@+id/galleryButton"
+            android:layout_width="207dp"
+            android:layout_height="48dp"
+            android:layout_marginStart="77dp"
+            android:layout_marginTop="20dp"
+            android:layout_marginEnd="76dp"
+            android:autoText="true"
+            android:text="Edit from Gallery"
+            android:textAppearance="@style/TextAppearance.AppCompat.Body2"
+            android:textSize="18sp"
+            app:icon="@android:drawable/ic_dialog_dialer"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/openCameraButton" />
+
+        <Button
+            android:id="@+id/objectsButton"
+            android:layout_width="207dp"
+            android:layout_height="48dp"
+            android:layout_marginStart="77dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="76dp"
+            android:autoText="true"
+            android:text="Saved Objects"
+            android:textAppearance="@style/TextAppearance.AppCompat.Body2"
+            android:textSize="18sp"
+            app:icon="?attr/actionModeCopyDrawable"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/galleryButton" />
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
+
+
 </androidx.constraintlayout.widget.ConstraintLayout>
+
