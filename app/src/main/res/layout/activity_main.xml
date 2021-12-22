@@ -17,10 +17,12 @@
         android:autoText="true"
         android:text="Open Camera"
         android:textAppearance="@style/TextAppearance.AppCompat.Body2"
+        android:textSize="18sp"
         app:icon="@drawable/ic_camera"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/imageView" />
+        app:layout_constraintTop_toBottomOf="@+id/imageView"
+        android:enabled="false"/>
 
     <ImageView
         android:id="@+id/imageView"
@@ -44,6 +46,7 @@
         android:autoText="true"
         android:text="Edit from Gallery"
         android:textAppearance="@style/TextAppearance.AppCompat.Body2"
+        android:textSize="18sp"
         app:icon="@android:drawable/ic_dialog_dialer"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -59,8 +62,10 @@
         android:autoText="true"
         android:text="Saved Objects"
         android:textAppearance="@style/TextAppearance.AppCompat.Body2"
+        android:textSize="18sp"
         app:icon="?attr/actionModeCopyDrawable"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/button4" />
+        app:layout_constraintTop_toBottomOf="@+id/button4"
+        android:enabled="false"/>
 </androidx.constraintlayout.widget.ConstraintLayout>
