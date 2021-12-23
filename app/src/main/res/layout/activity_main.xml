@@ -49,6 +49,7 @@
             android:layout_marginTop="20dp"
             android:layout_marginEnd="76dp"
             android:autoText="true"
+            android:backgroundTint="#5D1FED"
             android:text="Edit from Gallery"
             android:textAppearance="@style/TextAppearance.AppCompat.Body2"
             android:textSize="18sp"
