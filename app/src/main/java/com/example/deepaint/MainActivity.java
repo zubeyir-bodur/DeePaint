@@ -132,6 +132,16 @@ public class MainActivity extends AppCompatActivity {
 
         final Button objectsButton = findViewById(R.id.objectsButton);
 
+        final Button backButton = findViewById(R.id.buttonBack);
+
+        backButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                findViewById(R.id.welcomeScreen).setVisibility(View.VISIBLE);
+                findViewById(R.id.editScreen).setVisibility(View.GONE);
+            }
+        });
+
     }
 
     private static final int REQUEST_IMAGE_CAPTURE = 1012;

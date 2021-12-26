@@ -7,11 +7,11 @@
         <deviceKey>
           <Key>
             <type value="VIRTUAL_DEVICE_PATH" />
-            <value value="C:\Users\Dell\.android\avd\Nexus_S_API_25.avd" />
+            <value value="C:\Users\Dell\.android\avd\6.7_Horizontal_Fold-in_API_30.avd" />
           </Key>
         </deviceKey>
       </Target>
     </targetSelectedWithDropDown>
-    <timeTargetWasSelectedWithDropDown value="2021-12-23T21:15:18.561331400Z" />
+    <timeTargetWasSelectedWithDropDown value="2021-12-26T18:23:56.172046300Z" />
   </component>
 </project>
