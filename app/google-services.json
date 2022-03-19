@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "501010517177",
+    "project_id": "deepaint",
+    "storage_bucket": "deepaint.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:501010517177:android:eafc597ac24fef7f209f68",
+        "android_client_info": {
+          "package_name": "com.example.deepaint"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "501010517177-cv2sfpu5vjf4s65bb0i83igh53rh5ecs.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAE6PS986mFLVMIL2bgg-nzbEZD99aGQ-Q"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "501010517177-cv2sfpu5vjf4s65bb0i83igh53rh5ecs.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
