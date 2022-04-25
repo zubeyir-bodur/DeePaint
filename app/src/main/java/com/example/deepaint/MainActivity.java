@@ -12,6 +12,7 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
+import android.opengl.GLSurfaceView;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
@@ -38,7 +39,6 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         findViewById(R.id.editScreen).setVisibility(View.GONE);
         init();
-
     }
 
     private static final int REQUEST_PERMISSIONS = 1234;
@@ -80,6 +80,10 @@ public class MainActivity extends AppCompatActivity {
 
     private static final int REQUEST_PICK_IMAGE = 12345;
     private ImageView imageView;
+
+    //TODO Drawing Canvas for EditPage
+    private GLSurfaceView glView;
+
     private void init(){
 
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.N){
@@ -142,6 +146,27 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+
+        // DRAWING PART - EDIT BUTTON
+
+        // Create a GLSurfaceView instance and set it
+        // as the ContentView for this Activity.
+
+        // Read the edit button
+        final Button editButton = findViewById(R.id.button4);
+        glView = new GLSurfaceView(this);
+        // Define action listener for edit button
+        editButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                // When Edit is pressed, open the drawing canvas
+
+                // And display other buttons related to saving what is drawn
+
+            }
+        });
+
+
     }
 
     private static final int REQUEST_IMAGE_CAPTURE = 1012;
@@ -183,7 +208,7 @@ public class MainActivity extends AppCompatActivity {
 
             sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, imageUri));
         }
-        else if( data == null){
+        else if( data == null) {
             recreate();
             return;
         }
