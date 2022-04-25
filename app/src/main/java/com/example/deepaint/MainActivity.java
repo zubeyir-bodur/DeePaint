@@ -168,6 +168,7 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
 
+        //hello world
         if(requestCode == REQUEST_IMAGE_CAPTURE){
             if(imageUri == null){
                 final SharedPreferences p = getSharedPreferences(appID, 0);
