@@ -6,6 +6,7 @@ import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.ActivityManager;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
@@ -83,6 +84,7 @@ public class MainActivity extends AppCompatActivity {
 
     //TODO Drawing Canvas for EditPage
     private GLSurfaceView glView;
+    private boolean isEditor = false;
 
     private void init(){
 
@@ -154,15 +156,20 @@ public class MainActivity extends AppCompatActivity {
 
         // Read the edit button
         final Button editButton = findViewById(R.id.button4);
-        glView = new GLSurfaceView(this);
         // Define action listener for edit button
         editButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 // When Edit is pressed, open the drawing canvas
-
+                isEditor = !isEditor;
                 // And display other buttons related to saving what is drawn
-
+                if (isEditor) {
+                    // Enable the listener - draw when user touches
+                    glView = new Canvas(MainActivity.this);
+                } else {
+                    // Save the drawings
+                    glView = null;
+                }
             }
         });
 
@@ -193,7 +200,6 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
 
-        //hello world
         if(requestCode == REQUEST_IMAGE_CAPTURE){
             if(imageUri == null){
                 final SharedPreferences p = getSharedPreferences(appID, 0);
