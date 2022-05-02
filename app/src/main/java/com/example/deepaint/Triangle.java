@@ -21,7 +21,7 @@ public class Triangle {
             0.0f, 0.0f};
 
     // Set color with red, green, blue and alpha (opacity) values
-    private float[] color = {0.0f, 0.0f, 0.0f, 0.5f};
+    private float[] color = {0.0f, 0.0f, 1.0f, 0.5f};
 
     private final String vertexShaderCode =
             "attribute vec4 vPosition;" +
@@ -49,7 +49,7 @@ public class Triangle {
 
     private final int mProgram;
 
-    public Triangle(float coordinates[], float color[]) {
+    public Triangle(float[] coordinates, float[] color) {
         // Initialize the coordinates & the color of the triangle
         System.arraycopy(coordinates, 0, triangleCoordinates, 0, coordinates.length);
         System.arraycopy(color, 0, this.color, 0, color.length);

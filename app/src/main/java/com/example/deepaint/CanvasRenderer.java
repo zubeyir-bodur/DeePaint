@@ -9,7 +9,8 @@ import android.opengl.GLSurfaceView;
 class CanvasRenderer implements GLSurfaceView.Renderer {
 
     public void onSurfaceCreated(GL10 unused, EGLConfig config) {
-        // Set the background frame color - the background should be completely transparent
+        // Set the background frame color -
+        // the background should be completely transparent so v3 = 0
         // Color does not matter
         GLES20.glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
     }

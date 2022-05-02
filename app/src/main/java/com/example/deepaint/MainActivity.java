@@ -10,6 +10,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
@@ -19,6 +20,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.StrictMode;
 import android.provider.MediaStore;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -95,7 +97,7 @@ public class MainActivity extends AppCompatActivity {
 
         imageView = findViewById(R.id.imageView3);
 
-        if(!MainActivity.this.getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA)){
+        if(!MainActivity.this.getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA)) {
             findViewById(R.id.openCameraButton).setVisibility(View.GONE);
         }
 
@@ -160,12 +162,19 @@ public class MainActivity extends AppCompatActivity {
         editButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                // compute the coordinates of the top left corner of the img
+                int deviceWidth = Resources.getSystem().getDisplayMetrics().widthPixels;
+                int deviceHeight = Resources.getSystem().getDisplayMetrics().heightPixels;
+                float topLeftX = (float)(deviceWidth - width) / 2;
+                float topLeftY = (float)(deviceHeight - height) / 2;
+                float[] coordinates = {topLeftX, topLeftY};
+
                 // When Edit is pressed, open the drawing canvas
                 isEditor = !isEditor;
                 // And display other buttons related to saving what is drawn
                 if (isEditor) {
                     // Enable the listener - draw when user touches
-                    glView = new Canvas(MainActivity.this);
+                    glView = new Canvas(MainActivity.this, coordinates, width, height);
                 } else {
                     // Save the drawings
                     glView = null;
@@ -181,7 +190,7 @@ public class MainActivity extends AppCompatActivity {
     private Uri imageUri;
 
     private File createImageFile(){
-        final String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format( new Date());
+        final String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
         final String imageFileName = "/JPEG_" + timeStamp + ".jpg";
         final File storageDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
         return new File(storageDir+imageFileName);

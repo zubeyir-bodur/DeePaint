@@ -5,7 +5,7 @@ import android.graphics.Bitmap;
 import android.opengl.GLException;
 import android.opengl.GLSurfaceView;
 import android.view.MotionEvent;
-
+import java.lang.Math;
 import java.nio.IntBuffer;
 
 import javax.microedition.khronos.opengles.GL10;
@@ -15,16 +15,17 @@ public class Canvas extends GLSurfaceView {
     private final CanvasRenderer renderer;
     private float previousX;
     private float previousY;
-    private int x; // Coordinates of the top left corner of the canvas
-    private int y;
-    private int width; //
-    private int height;
+    private float x; // Coordinates of the top left corner of the canvas
+    private float y;
+    int width;
+    int height;
 
-    public Canvas(Context context, int[] coordinates, int width, int height) {
+    public Canvas(Context context, float[] coordinates, int width, int height) {
         super(context);
         x = coordinates[0];
         y = coordinates[1];
-
+        this.width = width;
+        this.height = height;
         // Create an OpenGL ES 2.0 context
         setEGLContextClientVersion(2);
 
@@ -54,16 +55,13 @@ public class Canvas extends GLSurfaceView {
         switch (e.getAction()) {
             case MotionEvent.ACTION_MOVE:
 
-                // TODO give the radius parametric from UI
                 float size = 1;
-                // TODO Draw a triangle w/ center previous x,y
-                //  with sides = size
-                float sqrtThree = 1;
+                float sqrtThree = (float)Math.pow(3.0, 0.5);
                 float[] triangleCoordinates = {x, y,
                         x - size/2, y - (size*sqrtThree)/2,
                         x + size/2, y - (size*sqrtThree)/2};
                 // Drawn object should be transparent
-                float[] colors = {0.0f, 0.0f, 0.0f, 0.5f};
+                float[] colors = {0.0f, 0.0f, 1.0f, 0.5f};
                 Triangle point = new Triangle(triangleCoordinates, colors);
                 point.draw();
         }
@@ -74,13 +72,11 @@ public class Canvas extends GLSurfaceView {
     }
 
     public float[][] toRGB(GL10 gl) {
-        float[][] img;
-        int width, height;
-        width = MainActivity.width;
-        height = MainActivity.height;
-        int x, y;
-        // TODO compute the top corner coordinates of the image
-        Bitmap bitmap = createBitmapFromGLSurface(0, 0, width, height, gl);
+        float[][] img = new float[width][height];
+        Bitmap bitmap = createBitmapFromGLSurface((int)x, (int)y, width, height, gl);
+
+        // TODO convert the bitmap into RGB image
+
         return img;
     }
 
