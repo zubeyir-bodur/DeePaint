@@ -174,6 +174,7 @@ public class MainActivity extends AppCompatActivity {
                 // And display other buttons related to saving what is drawn
                 if (isEditor) {
                     // Enable the listener - draw when user touches
+                    // TODO button click does not result in a drawing...
                     glView = new Canvas(MainActivity.this, coordinates, width, height);
                 } else {
                     // Save the drawings

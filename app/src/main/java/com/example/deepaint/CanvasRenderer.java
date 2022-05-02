@@ -35,9 +35,4 @@ class CanvasRenderer implements GLSurfaceView.Renderer {
 
         return shader;
     }
-
-    /*
-    public void setAngle(float angle) {
-
-    }*/
 }

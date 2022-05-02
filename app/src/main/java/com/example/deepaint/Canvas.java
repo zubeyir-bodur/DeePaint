@@ -12,30 +12,22 @@ import javax.microedition.khronos.opengles.GL10;
 
 public class Canvas extends GLSurfaceView {
     private final float TOUCH_SCALE_FACTOR = 180.0f / 320;
-    private final CanvasRenderer renderer;
+    private CanvasRenderer renderer;
     private float previousX;
     private float previousY;
-    private float x; // Coordinates of the top left corner of the canvas
-    private float y;
+    private float topLeftX; // Coordinates of the top left corner of the canvas
+    private float topLeftY;
     int width;
     int height;
 
     public Canvas(Context context, float[] coordinates, int width, int height) {
         super(context);
-        x = coordinates[0];
-        y = coordinates[1];
+        init();
+        topLeftX = coordinates[0];
+        topLeftY = coordinates[1];
         this.width = width;
         this.height = height;
-        // Create an OpenGL ES 2.0 context
-        setEGLContextClientVersion(2);
 
-        renderer = new CanvasRenderer();
-
-        // Set the Renderer for drawing on the GLSurfaceView
-        setRenderer(renderer);
-
-        // Render the view only when there is a change in the drawing data
-        setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
     }
 
     /**
@@ -73,7 +65,7 @@ public class Canvas extends GLSurfaceView {
 
     public float[][] toRGB(GL10 gl) {
         float[][] img = new float[width][height];
-        Bitmap bitmap = createBitmapFromGLSurface((int)x, (int)y, width, height, gl);
+        Bitmap bitmap = createBitmapFromGLSurface((int) topLeftX, (int) topLeftY, width, height, gl);
 
         // TODO convert the bitmap into RGB image
 
@@ -106,6 +98,19 @@ public class Canvas extends GLSurfaceView {
         }
 
         return Bitmap.createBitmap(bitmapSource, w, h, Bitmap.Config.ARGB_8888);
+    }
+
+    private void init() {
+        // Create an OpenGL ES 2.0 context
+        setEGLContextClientVersion(2);
+
+        renderer = new CanvasRenderer();
+
+        // Set the Renderer for drawing on the GLSurfaceView
+        setRenderer(renderer);
+
+        // Render the view only when there is a change in the drawing data
+        setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
     }
 
 }
