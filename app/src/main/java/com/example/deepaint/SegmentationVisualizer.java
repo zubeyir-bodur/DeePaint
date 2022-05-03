@@ -4,7 +4,11 @@ import android.graphics.Bitmap;
 
 import java.util.ArrayList;
 
+/**
+ * Deprecated
+ */
 public class SegmentationVisualizer {
+    /*
     // PROPERTIES
 
     // The image
@@ -18,14 +22,7 @@ public class SegmentationVisualizer {
     // Opacity of the segments - ranges from 0 to 1
     private float opacity;
 
-    /**
-     * Creates a segmentation visualizer for this image
-     * @param bitmap
-     * @param width
-     * @param height
-     */
     public SegmentationVisualizer(Bitmap bitmap, int width, int height, ArrayList<int[][]> masks, float opacity) {
-        // TODO convert the bitmap into RGB matrix
         I = getMatrixRGB(bitmap);
         this.width = width;
         this.height = height;
@@ -35,10 +32,6 @@ public class SegmentationVisualizer {
         this.opacity = opacity;
     }
 
-    /**
-     * Produces the final output of the segmentation visualizer
-     * @return
-     */
     public int[][][] getMapImageCombined() {
         int[][][] segmentationMap = getSegmentationMap();
         int[][][] combined = new int[height][width][3];
@@ -52,10 +45,6 @@ public class SegmentationVisualizer {
         return combined;
     }
 
-    /**
-     * Returns the segmentation map only - without the original image
-     * @return
-     */
     public int[][][] getSegmentationMap() {
         // Elliptic kernel for magnifying the edges
         int[][] SE = new int[][]{
@@ -77,7 +66,6 @@ public class SegmentationVisualizer {
                 if (width >= 0)
                     System.arraycopy(masks.get(i)[y], 0, mask[y], 0, width);
             }
-            // TODO sobel edge detection of the masks
             int[][] edge = getSobelEdges(mask);
             int[][] edge_bold = dilate(edge, SE);
             int[][][] colored_edge = new int[height][width][3];
@@ -103,34 +91,13 @@ public class SegmentationVisualizer {
         return visualizer;
     }
 
-    /**
-     * Convert a bitmap image into an RGB image matrix
-     * with size heightxwidthx3
-     * @param bmb
-     * @return
-     */
     public static int[][][] getMatrixRGB(Bitmap bmb) {
-        // TODO
         return null;
     }
-
-    /**
-     * Computes the Edges of a Grayscale Image
-     * Using Sobel Edge Detection Matrices
-     * @return
-     */
     public static int[][] getSobelEdges(int[][] grayscale) {
-        // TODO
         return null;
     }
-
-    /**
-     * Dilation
-     * @param grayscale
-     * @return
-     */
     public static int[][] dilate(int[][] grayscale, int[][] SE) {
-        // TODO
         return null;
-    }
+    }*/
 }

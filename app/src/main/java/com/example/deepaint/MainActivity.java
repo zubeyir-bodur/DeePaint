@@ -6,13 +6,15 @@ import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.ActivityManager;
 import android.app.ProgressDialog;
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.opengl.GLSurfaceView;
 import android.os.Build;
@@ -24,7 +26,6 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import java.io.File;
@@ -88,6 +89,7 @@ public class MainActivity extends AppCompatActivity {
     private GLSurfaceView glView;
     private boolean isEditor = false;
 
+    @SuppressLint("ClickableViewAccessibility")
     private void init(){
 
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.N){
@@ -183,6 +185,67 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        // ImageView = Get the coordinates of the touched/clicked pixel
+        // Click does not have a motion event, so it is not possible to
+        // retrieve coordinates of a click event...
+        imageView.setOnTouchListener(new View.OnTouchListener() {
+            // TODO do this operations only when image removal button is pressed
+            @Override
+            public boolean onTouch(View view, MotionEvent event) {
+
+                float eventX = event.getX();
+                float eventY = event.getY();
+                float[] eventXY = new float[] {eventX, eventY};
+
+                Matrix invertMatrix = new Matrix();
+                ((ImageView)view).getImageMatrix().invert(invertMatrix);
+
+                invertMatrix.mapPoints(eventXY);
+                int x = (int) eventXY[0];
+                int y = (int) eventXY[1];
+
+                System.out.println(
+                        "touched position in imgView: "
+                                + String.valueOf(eventX) + " / "
+                                + String.valueOf(eventY));
+                System.out.println(
+                        "touched position in actual image: "
+                                + String.valueOf(x) + " / "
+                                + String.valueOf(y));
+
+                Drawable imgDrawable = ((ImageView)view).getDrawable();
+                Bitmap bitmap = ((BitmapDrawable)imgDrawable).getBitmap();
+
+                System.out.println(
+                        "drawable size: "
+                                + String.valueOf(bitmap.getWidth()) + " / "
+                                + String.valueOf(bitmap.getHeight()));
+
+                //Limit x, y range within bitmap
+                if(x < 0){
+                    x = 0;
+                }else if(x > bitmap.getWidth()-1){
+                    x = bitmap.getWidth()-1;
+                }
+
+                if(y < 0){
+                    y = 0;
+                }else if(y > bitmap.getHeight()-1){
+                    y = bitmap.getHeight()-1;
+                }
+
+                int touchedRGB = bitmap.getPixel(x, y);
+
+                System.out.println("touched color: " + "#" + Integer.toHexString(touchedRGB));
+
+
+                // TODO send a request to check if the region
+                //  is contained by a segmented region
+                //  actual coordinates in the image is (x, y)
+
+                return true;
+            }
+        });
 
     }
 
