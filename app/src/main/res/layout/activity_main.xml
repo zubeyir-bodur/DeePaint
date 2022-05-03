@@ -83,7 +83,8 @@
         android:layout_height="match_parent"
         android:background="#CA3B3B"
         android:backgroundTint="#0F0F0F"
-        tools:context=".EditPage">
+        tools:context=".EditPage"
+        tools:visibility="visible">
 
         <ImageView
             android:id="@+id/imageView3"

@@ -198,6 +198,7 @@ public class MainActivity extends AppCompatActivity {
 
         editMode = true;
 
+
         findViewById(R.id.welcomeScreen).setVisibility(View.GONE);
         findViewById(R.id.editScreen).setVisibility(View.VISIBLE);
 
