@@ -12,12 +12,14 @@
         <entry key="..\:/Users/Dell/DeePaint/app/src/main/res/drawable/ic_share.xml" value="0.1" />
         <entry key="..\:/Users/Dell/DeePaint/app/src/main/res/drawable/input_bg.xml" value="0.1" />
         <entry key="..\:/Users/Dell/DeePaint/app/src/main/res/layout/activity_auth_page.xml" value="0.22" />
+        <entry key="..\:/Users/Dell/DeePaint/app/src/main/res/layout/activity_edit_image.xml" value="0.5" />
         <entry key="..\:/Users/Dell/DeePaint/app/src/main/res/layout/activity_edit_page.xml" value="0.22" />
         <entry key="..\:/Users/Dell/DeePaint/app/src/main/res/layout/activity_main.xml" value="0.22" />
         <entry key="..\:/Users/Dell/DeePaint/app/src/main/res/layout/activity_main_page.xml" value="0.14583333333333334" />
         <entry key="..\:/Users/Dell/DeePaint/app/src/main/res/layout/activity_pencil_page.xml" value="0.3333333333333333" />
         <entry key="..\:/Users/Dell/DeePaint/app/src/main/res/layout/activity_register.xml" value="0.22" />
         <entry key="..\:/Users/Dell/DeePaint/app/src/main/res/layout/activity_saved_objects_page.xml" value="0.22" />
+        <entry key="..\:/Users/Dell/DeePaint/app/src/main/res/layout/activity_welcome.xml" value="0.1" />
         <entry key="..\:/Users/Dell/DeePaint/app/src/main/res/layout/add_text_dialog.xml" value="0.16666666666666666" />
         <entry key="..\:/Users/Dell/DeePaint/app/src/main/res/layout/color_picker_item_list.xml" value="0.1" />
         <entry key="..\:/Users/Dell/DeePaint/app/src/main/res/layout/fragment_bottom_custom_effect_dialog.xml" value="0.22" />
