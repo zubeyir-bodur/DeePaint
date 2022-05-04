@@ -1,7 +1,6 @@
 package com.example.deepaint;
 
 import androidx.appcompat.app.AppCompatActivity;
-
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.ActivityManager;
@@ -176,10 +175,18 @@ public class MainActivity extends AppCompatActivity {
                 // And display other buttons related to saving what is drawn
                 if (isEditor) {
                     // Enable the listener - draw when user touches
-                    // TODO button click does not result in a drawing...
+                    // TODO onTouchEvent does not fire
                     glView = new Canvas(MainActivity.this, coordinates, width, height);
+                    setContentView(glView);
+                    glView.setOnTouchListener(new View.OnTouchListener() {
+                        @Override
+                        public boolean onTouch(View view, MotionEvent motionEvent) {
+                            return glView.onTouchEvent(motionEvent);
+                        }
+                    });
                 } else {
                     // Save the drawings
+                    setContentView(R.layout.activity_edit_page);
                     glView = null;
                 }
             }

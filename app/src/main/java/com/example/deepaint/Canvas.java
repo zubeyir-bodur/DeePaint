@@ -27,7 +27,6 @@ public class Canvas extends GLSurfaceView {
         topLeftY = coordinates[1];
         this.width = width;
         this.height = height;
-
     }
 
     /**
@@ -47,15 +46,17 @@ public class Canvas extends GLSurfaceView {
         switch (e.getAction()) {
             case MotionEvent.ACTION_MOVE:
 
-                float size = 1;
+                float size = 10;
                 float sqrtThree = (float)Math.pow(3.0, 0.5);
                 float[] triangleCoordinates = {x, y,
                         x - size/2, y - (size*sqrtThree)/2,
                         x + size/2, y - (size*sqrtThree)/2};
                 // Drawn object should be transparent
-                float[] colors = {0.0f, 0.0f, 1.0f, 0.5f};
+                float[] colors = {0.0f, 0.0f, 1.0f, 1.0f};
                 Triangle point = new Triangle(triangleCoordinates, colors);
-                point.draw();
+                // point.draw();
+                renderer.addTriangle(point);
+                renderer.drawALl();
         }
 
         previousX = x;
