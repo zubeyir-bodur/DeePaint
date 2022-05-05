@@ -84,7 +84,7 @@ public class MainActivity extends AppCompatActivity {
     private static final int REQUEST_PICK_IMAGE = 12345;
     private ImageView imageView;
 
-    //TODO Drawing Canvas for EditPage
+    // TODO Drawing Canvas for EditPage
     private GLSurfaceView glView;
     private boolean isEditor = false;
 
@@ -176,17 +176,18 @@ public class MainActivity extends AppCompatActivity {
                 if (isEditor) {
                     // Enable the listener - draw when user touches
                     // TODO onTouchEvent does not fire
-                    glView = new Canvas(MainActivity.this, coordinates, width, height);
-                    setContentView(glView);
+                    // glView = new Canvas(MainActivity.this, coordinates, width, height);
+                    // setContentView(glView);
+                    /*
                     glView.setOnTouchListener(new View.OnTouchListener() {
                         @Override
                         public boolean onTouch(View view, MotionEvent motionEvent) {
                             return glView.onTouchEvent(motionEvent);
                         }
-                    });
+                    });*/
                 } else {
                     // Save the drawings
-                    setContentView(R.layout.activity_edit_page);
+                    //setContentView(R.layout.activity_edit_page);
                     glView = null;
                 }
             }
@@ -215,10 +216,6 @@ public class MainActivity extends AppCompatActivity {
                         "touched position in imgView: "
                                 + String.valueOf(eventX) + " / "
                                 + String.valueOf(eventY));
-                System.out.println(
-                        "touched position in actual image: "
-                                + String.valueOf(x) + " / "
-                                + String.valueOf(y));
 
                 Drawable imgDrawable = ((ImageView)view).getDrawable();
                 Bitmap bitmap = ((BitmapDrawable)imgDrawable).getBitmap();
@@ -243,12 +240,17 @@ public class MainActivity extends AppCompatActivity {
 
                 int touchedRGB = bitmap.getPixel(x, y);
 
+                System.out.println(
+                        "touched position in actual image: "
+                                + String.valueOf(x) + " / "
+                                + String.valueOf(y));
                 System.out.println("touched color: " + "#" + Integer.toHexString(touchedRGB));
 
 
                 // TODO send a request to check if the region
                 //  is contained by a segmented region
                 //  actual coordinates in the image is (x, y)
+
 
                 return true;
             }
