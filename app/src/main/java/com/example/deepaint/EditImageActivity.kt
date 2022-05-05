@@ -5,8 +5,11 @@ import android.annotation.SuppressLint
 import android.content.DialogInterface
 import android.content.Intent
 import android.graphics.Bitmap
+import android.graphics.Matrix
 import android.graphics.Typeface
+import android.graphics.drawable.BitmapDrawable
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.os.Environment
 import android.provider.MediaStore
@@ -17,6 +20,7 @@ import android.view.animation.AnticipateOvershootInterpolator
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.annotation.NonNull
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
@@ -32,6 +36,7 @@ import com.example.deepaint.tools.ToolType
 import ja.burhanrashid52.photoeditor.*
 import java.io.File
 import java.io.IOException
+
 
 class EditImageActivity : BaseActivity(), OnPhotoEditorListener, View.OnClickListener,
         PropertiesBSFragment.Properties,
@@ -86,6 +91,7 @@ class EditImageActivity : BaseActivity(), OnPhotoEditorListener, View.OnClickLis
         // mPhotoEditorView.getSource().setImageResource(R.drawable.color_palette);
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     private fun initViews() {
         val imgUndo: ImageView
         val imgRedo: ImageView
@@ -110,6 +116,75 @@ class EditImageActivity : BaseActivity(), OnPhotoEditorListener, View.OnClickLis
         imgSave.setOnClickListener(this)
         imgClose = findViewById(R.id.imgClose)
         imgClose.setOnClickListener(this)
+        mPhotoEditorView!!.setOnTouchListener(object : View.OnTouchListener {
+            override fun onTouch(v: View?, event: MotionEvent?): Boolean {
+                when (event?.action) {
+                    MotionEvent.ACTION_DOWN -> {
+                        Log.d("my tag: ", "here")
+                        val eventX = event.x
+                        val eventY = event.y
+                        val eventXY = floatArrayOf(eventX, eventY)
+
+                        val invertMatrix = Matrix()
+                        (v as PhotoEditorView).source.imageMatrix.invert(invertMatrix)
+
+                        var offset = floatArrayOf(0f, 0f)
+                        // invertMatrix.mapPoints(offset, 0, floatArrayOf(0f, 0f), 0, 2)
+                        // Log.d("offset:", "${offset[0]} / ${offset[1]}")
+
+                        invertMatrix.mapPoints(eventXY)
+                        var x = eventXY[0].toInt()
+                        var y = eventXY[1].toInt()
+
+
+                        Log.d("touched xy in image: ", x.toString() + " / "
+                                + y.toString())
+
+                        val imgDrawable = (v as PhotoEditorView).source.drawable
+                        val bitmap = (imgDrawable as BitmapDrawable).bitmap
+
+                        Log.d("drawable size: ",
+                                bitmap.width.toString() + " / "
+                                        + bitmap.height.toString())
+
+                        //Limit x, y range within bitmap
+
+                        //Limit x, y range within bitmap
+                        if (x < 0) {
+                            x = 0
+                        } else if (x > bitmap.width - 1) {
+                            x = bitmap.width - 1
+                        }
+
+                        if (y < 0) {
+                            y = 0
+                        } else if (y > bitmap.height - 1) {
+                            y = bitmap.height - 1
+                        }
+
+                        val touchedRGB = bitmap.getPixel(x, y)
+
+
+                        Log.d("touched xy in view: ",eventX.toString() + " / "
+                                + eventY.toString())
+                        Log.d("touched xy in image: ", x.toString() + " / "
+                                + y.toString())
+                        Log.d(" touched color: ",  "#" + Integer.toHexString(touchedRGB))
+
+                        // TODO if the touched points
+
+                        // TODO send a request to check if the region
+                        //  is contained by a segmented region
+                        //  actual coordinates in the image is (x, y)
+                        //   can record these coordinates in an array
+                        //   and send a single request when
+                        //   , say, delete selected objects button is pressed
+                        return true
+                    }
+                }
+                return v?.onTouchEvent(event) ?: true
+            }
+        })
     }
 
     override fun onEditTextChangeListener(rootView: View?, text: String?, colorCode: Int) {
@@ -159,6 +234,7 @@ class EditImageActivity : BaseActivity(), OnPhotoEditorListener, View.OnClickLis
     }
 
 
+    @RequiresApi(Build.VERSION_CODES.M)
     override fun onClick(view: View) {
         when (view.id) {
             R.id.imgUndo -> mPhotoEditor!!.undo()
@@ -178,9 +254,12 @@ class EditImageActivity : BaseActivity(), OnPhotoEditorListener, View.OnClickLis
         }
     }
 
+
+
+    @RequiresApi(Build.VERSION_CODES.M)
     @SuppressLint("MissingPermission")
     private fun saveImage() {
-        if (requestPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+        if (requestPermissionEdit(Manifest.permission.MANAGE_EXTERNAL_STORAGE)) {
             showLoading("Saving...")
             val file = File(
                     Environment.getExternalStorageDirectory()
@@ -188,6 +267,7 @@ class EditImageActivity : BaseActivity(), OnPhotoEditorListener, View.OnClickLis
                             + System.currentTimeMillis() + ".png"
             )
             try {
+                // TODO operation not permitted
                 file.createNewFile()
                 val saveSettings: SaveSettings = SaveSettings.Builder()
                         .setClearViewsEnabled(true)
@@ -261,13 +341,14 @@ class EditImageActivity : BaseActivity(), OnPhotoEditorListener, View.OnClickLis
         mPhotoEditor!!.addImage(bitmap)
         mTxtCurrentTool!!.setText(R.string.label_sticker)
     }
-
+    /*
     override fun isPermissionGranted(isGranted: Boolean, permission: String?) {
         if (isGranted) {
             saveImage()
         }
-    }
+    }*/
 
+    @RequiresApi(Build.VERSION_CODES.M)
     private fun showSaveDialog() {
         val builder: AlertDialog.Builder = AlertDialog.Builder(this)
         builder.setMessage("Are you want to exit without saving image ?")
@@ -286,6 +367,7 @@ class EditImageActivity : BaseActivity(), OnPhotoEditorListener, View.OnClickLis
 
     override fun onToolSelected(toolType: ToolType?) {
         when (toolType) {
+            // TODO Add buttons for tasks here
             ToolType.BRUSH -> {
                 mPhotoEditor!!.setBrushDrawingMode(true)
                 mTxtCurrentTool!!.setText(R.string.label_brush)
@@ -347,6 +429,7 @@ class EditImageActivity : BaseActivity(), OnPhotoEditorListener, View.OnClickLis
         mConstraintSet.applyTo(mRootView)
     }
 
+    @RequiresApi(Build.VERSION_CODES.M)
     override fun onBackPressed() {
         if (mIsFilterVisible) {
             showFilter(false)

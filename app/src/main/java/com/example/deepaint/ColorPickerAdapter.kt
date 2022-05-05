@@ -19,12 +19,13 @@ class ColorPickerAdapter internal constructor(
         @NonNull colorPickerColors: List<Int>
 ) : RecyclerView.Adapter<ColorPickerAdapter.ViewHolder?>() {
     private var inflater: LayoutInflater
-    private val colorPickerColors: List<Int>
+    private var colorPickerColors: List<Int>
     private var onColorPickerClickListener: OnColorPickerClickListener? = null
 
     internal constructor(@NonNull context: Context?) : this(context, getDefaultColors(context!!)) {
         this.context = context
         inflater = LayoutInflater.from(context)
+        this@ColorPickerAdapter.colorPickerColors = getDefaultColors(context!!)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {

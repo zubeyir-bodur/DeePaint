@@ -38,7 +38,6 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         findViewById(R.id.editScreen).setVisibility(View.GONE);
         init();
-
     }
 
     private static final int REQUEST_PERMISSIONS = 1234;
@@ -60,7 +59,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onResume(){
+    protected void onResume() {
         super.onResume();
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && notPermissions()){
             requestPermissions(PERMISSIONS, REQUEST_PERMISSIONS);
