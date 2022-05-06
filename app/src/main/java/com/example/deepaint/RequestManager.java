@@ -137,6 +137,64 @@ public class RequestManager {
         }
     }
 
+    public static void sendSegmentationRequest(Bitmap bitmapToSegment, String fileName) {
+        System.out.println("Segmentation clicked in java");
+        try {
+            new Thread(() -> {
+                try {
+                    String requestUrl = "https://ae71-35-238-204-175.ngrok.io/segmentate";
+                    final OkHttpClient client = new OkHttpClient.Builder()
+                            .build();
+                    ByteArrayOutputStream stream = new ByteArrayOutputStream();
+                    bitmapToSegment.compress(Bitmap.CompressFormat.JPEG, 100, stream);
+                    byte[] byteArray = stream.toByteArray();
+                    RequestBody requestBody = new MultipartBody.Builder()
+                            .setType(MultipartBody.FORM)
+                            .addFormDataPart("img.png", fileName,
+                                    RequestBody.create(MediaType.parse("image/png"), byteArray))
+                            .build();
+
+                    Request request = new Request.Builder()
+                            .url(requestUrl)
+                            .post(requestBody)
+                            .build();
+                    client.newCall(request).enqueue(new Callback() {
+                        @Override
+                        public void onFailure(Call call, IOException e) {
+                            System.out.println("Request Failed");
+                        }
+
+                        @Override
+                        public void onResponse(Call call, Response response) throws IOException {
+                            if (response.code() == 200) {
+                                System.out.println("Request Success");
+                                String fileNameNoExt = fileName.substring(0, fileName.lastIndexOf('.'));
+                                String downloadPath = Environment.getExternalStorageDirectory().toString()
+                                        + File.separator
+                                        + "Download/" + fileNameNoExt + "_segmentation.zip";
+                                File file = new File(downloadPath);
+                                BufferedSink sink = Okio.buffer(Okio.sink(file));
+                                sink.writeAll(response.body().source());
+                                sink.close();
+                            } else {
+                                System.out.println("Error " + response.code() + " " + response.message());
+                            }
+                        }
+                    });
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }).start();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void sendAutoRemoveRequest() {
+        // TODO
+    }
+
     /**
     * Copy an InputStream to a File.
      * @Deprecated

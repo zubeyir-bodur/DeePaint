@@ -7,7 +7,6 @@ import android.content.DialogInterface
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.graphics.Matrix
 import android.graphics.Typeface
 import android.graphics.drawable.BitmapDrawable
 import android.net.Uri
@@ -23,6 +22,7 @@ import android.view.View
 import android.view.animation.AnticipateOvershootInterpolator
 import android.widget.ImageView
 import android.widget.TextView
+import android.widget.Toast
 import androidx.annotation.NonNull
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
@@ -65,7 +65,10 @@ class EditImageActivity : BaseActivity(), OnPhotoEditorListener, View.OnClickLis
     private val mConstraintSet: ConstraintSet = ConstraintSet()
     private var mIsFilterVisible = false
     private var chosenFilePath  = ""
+    private var isAutoRemove = false
+    private var bitmapMask : Bitmap? = null
     var cameraUri : Uri? = null
+    private var context = this
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         makeFullScreen()
@@ -84,6 +87,8 @@ class EditImageActivity : BaseActivity(), OnPhotoEditorListener, View.OnClickLis
         val llmFilters = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
         mRvFilters!!.setLayoutManager(llmFilters)
         mRvFilters!!.setAdapter(mFilterViewAdapter)
+
+
 
 
         //Typeface mTextRobotoTf = ResourcesCompat.getFont(this, R.font.roboto_medium);
@@ -204,84 +209,57 @@ class EditImageActivity : BaseActivity(), OnPhotoEditorListener, View.OnClickLis
             override fun onTouch(v: View?, event: MotionEvent?): Boolean {
                 when (event?.action) {
                     MotionEvent.ACTION_DOWN -> {
-                        Log.d("my tag: ", "Touched without brush")
-                        val eventX = event.x
-                        val eventY = event.y
-                        val eventXY = floatArrayOf(eventX, eventY)
+                        if (isAutoRemove) {
+                            Log.d("my tag: ", "Touched without brush")
+                            val eventX = event.x
+                            val eventY = event.y
+                            val eventXY = floatArrayOf(eventX, eventY)
+                            val pev = (v as PhotoEditorView)
 
-                        val invertMatrix = Matrix()
-                        val pev = (v as PhotoEditorView)
-                        val imageMatrix = pev.source.imageMatrix
-                        val imgDrawable = (v as PhotoEditorView).source.drawable
-                        val bitmap = (imgDrawable as BitmapDrawable).bitmap
-                        val imgHeight = bitmap.height
-                        val imgWidth = bitmap.width
-                        val pevHeight = pev.height
-                        val pevWidth = pev.width
+                            val imgDrawable = (v as PhotoEditorView).source.drawable
+                            val bitmap = (imgDrawable as BitmapDrawable).bitmap
+                            val imgHeight = bitmap.height
+                            val imgWidth = bitmap.width
+                            val pevHeight = pev.height
+                            val pevWidth = pev.width
 
-                        invertMatrix.mapPoints(eventXY)
-                        var x = eventXY[0].toInt()
-                        var y = eventXY[1].toInt()
-                        var x_ = -1
-                        var y_ = -1
+                            val relative_img_width = pevWidth
+                            val relative_img_height = pevWidth*imgHeight/imgWidth
+                            var x = eventXY[0].toInt()
+                            var y = eventXY[1].toInt()
+                            val relative_img_x= x*imgWidth/pevWidth
+                            val relative_img_Y= (y - (pevHeight-relative_img_height)/2)*imgHeight/relative_img_height
+                            Log.d("drawable size: ",
+                                    imgWidth.toString() + " / "
+                                            + imgHeight.toString())
+                            Log.d("clicked on image coordinates: ",
+                                    relative_img_x.toString() + " / "
+                                            + relative_img_Y.toString())
 
-                        val ratioImg = imgWidth / imgHeight.toFloat()
-                        val ratioView = pevWidth / pevHeight.toFloat()
-                        // CASE 1 - The space is horizontal
-                        if (ratioImg > ratioView) {
-                            val xRatio = imgWidth.toFloat()/ pevWidth
-                            val yScaled = xRatio * pevHeight
-                            val spaceY = (yScaled - imgHeight) / 2
-                            y_ = (y - spaceY).toInt()
-                            x_ = x
+                            if (relative_img_x > 0 && relative_img_Y > 0 && relative_img_Y < bitmap.height && relative_img_x < bitmap.width) {
+                                Log.d("Mask limits", "${bitmapMask!!.width} / ${bitmapMask!!.height}")
+                                val labelColor = bitmapMask!!.getPixel(relative_img_x, relative_img_Y)
+                                Log.d("Label Color Value in 32 bits", labelColor.toString())
+                                val labelHex = Integer.toHexString(labelColor)
+                                var labelNo = Integer.decode(labelHex.substring(7, 8))
+                                Log.d("Label No", labelNo.toString())
+
+                                val builder = AlertDialog.Builder(context)
+                                builder.setTitle("Proceed?")
+                                builder.setMessage("Are you sore? The object that you have selected will be removed from the image")
+                                builder.setNegativeButton("Re-select") {dialog, which ->
+                                    Toast.makeText(applicationContext,
+                                            "Re-selecting...", Toast.LENGTH_SHORT).show()
+                                }
+                                builder.setPositiveButton("Yes") { dialog, which ->
+                                    Toast.makeText(applicationContext,
+                                            "Done!", Toast.LENGTH_SHORT).show()
+                                    // TODO
+                                    RequestManager.sendAutoRemoveRequest()
+                                }
+                                builder.show()
+                            }
                         }
-                        // CASE 2 - The space is vertical
-                        else if (ratioImg < ratioView) {
-                            val yRatio = imgHeight.toFloat()/ pevHeight
-                            val xScaled = yRatio * pevWidth
-                            val spaceX = (xScaled - imgWidth) / 2
-                            x_ = (x - spaceX).toInt()
-                            y_ = y
-                        }
-                        // CASE 3 - Perfect Fit
-                        else {
-                            // TODO
-                        }
-
-                        Log.d("touched xy in image?: ", x.toString() + " / "
-                                + y.toString())
-
-                        Log.d("touched xy in image scratch: ", x_.toString() + " / "
-                                + y_.toString())
-
-
-                        Log.d("drawable size: ",
-                                imgWidth.toString() + " / "
-                                        + imgHeight.toString())
-
-                        //Limit x, y range within bitmap
-
-                        //Limit x, y range within bitmap
-                        if (x < 0) {
-                            x = 0
-                        } else if (x > imgWidth - 1) {
-                            x = imgWidth - 1
-                        }
-
-                        if (y < 0) {
-                            y = 0
-                        } else if (y > imgHeight - 1) {
-                            y = imgHeight - 1
-                        }
-
-                        val touchedRGB = bitmap.getPixel(x, y)
-
-
-                        Log.d("touched xy in view: ",eventX.toString() + " / "
-                                + eventY.toString())
-                        Log.d("touched xy in image: ", x.toString() + " / "
-                                + y.toString())
-                        Log.d(" touched color: ",  "#" + Integer.toHexString(touchedRGB))
 
                         // TODO if the touched points
 
@@ -535,6 +513,57 @@ class EditImageActivity : BaseActivity(), OnPhotoEditorListener, View.OnClickLis
                     getSupportFragmentManager(),
                     mStickerBSFragment!!.getTag()
             )
+            ToolType.SEGMENT -> {
+                Log.d("segment", "clicked")
+                Log.d("ChosenFilepath", chosenFilePath)
+                val fileName = chosenFilePath.substring(chosenFilePath.lastIndexOf(File.separator)+1)
+                var fileNameNoExt = ""
+                if (fileName != "")
+                    fileNameNoExt = fileName.substring(0, fileName.lastIndexOf('.'))
+                val bmp = (mPhotoEditorView as PhotoEditorView).source.drawable.toBitmap()
+                RequestManager.sendSegmentationRequest(bmp, fileName)
+                showLoading("Processing")
+                Handler().postDelayed({
+                    try {
+                        isAutoRemove = false
+                        hideLoading()
+                        val outFilePath = (Environment.getExternalStorageDirectory().toString()
+                                + File.separator
+                                + "Download/" + fileNameNoExt + "_segmentation.zip")
+                        val outFile : File = File(outFilePath)
+                        Log.d("Does the zip file Exist? ", outFile.isFile().toString())
+                        UnzipUtils.unzip(outFile, (Environment.getExternalStorageDirectory().toString()
+                                + File.separator
+                                + "DCIM"))
+                        // mPhotoEditorView!!.source.setImageURI(Uri.fromFile(File(outFilePath)))
+                        val predFile : File = File((Environment.getExternalStorageDirectory().toString()
+                                + File.separator
+                                + "DCIM/${fileNameNoExt}._pred.png"))
+                        val maskFile : File = File((Environment.getExternalStorageDirectory().toString()
+                                + File.separator
+                                + "DCIM/${fileNameNoExt}._pred_masks.png"))
+                        var bitmapPred = BitmapFactory.decodeFile(predFile.absolutePath)
+                        chosenFilePath = predFile.absolutePath
+                        mPhotoEditorView!!.source.setImageBitmap(bitmapPred)
+                        bitmapMask = BitmapFactory.decodeFile(maskFile.absolutePath)
+
+
+                        val builder = AlertDialog.Builder(this)
+                        builder.setTitle("Automatic Object Removal Beta!")
+                        builder.setMessage("Please select a painted region to remove it.")
+                        builder.setNeutralButton("Got It!") { dialog, which ->
+                            Toast.makeText(applicationContext,
+                                    "Got It!", Toast.LENGTH_SHORT).show()
+                        }
+                        builder.show()
+                        isAutoRemove = true
+
+
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                    }
+                },8000)
+            }
         }
     }
 
@@ -583,4 +612,6 @@ class EditImageActivity : BaseActivity(), OnPhotoEditorListener, View.OnClickLis
         private const val CAMERA_REQUEST = 52
         private const val PICK_REQUEST = 53
     }
+
+
 }
