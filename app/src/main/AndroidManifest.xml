@@ -4,10 +4,6 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-    <uses-permission
-        android:name="android.permission.WRITE_EXTERNAL_STORAGE"
-        android:maxSdkVersion="29"
-        tools:ignore="ScopedStorage" />
     <uses-permission android:name="android.permission.INTERNET"/>
 
     <uses-feature
@@ -30,7 +26,6 @@
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-                <action android:name="android.intent.action.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>

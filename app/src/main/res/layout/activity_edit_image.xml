@@ -11,7 +11,7 @@
 
 
     <ImageView
-        android:id="@+id/imgSend2"
+        android:id="@+id/imgDrawing"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="8dp"
@@ -22,6 +22,19 @@
         app:layout_constraintEnd_toStartOf="@+id/imgSave"
         app:layout_constraintTop_toBottomOf="@+id/guideline"
         app:layout_constraintVertical_bias="0.593" />
+
+    <ImageView
+        android:id="@+id/imgFill"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="8dp"
+        android:background="#000000"
+        android:foreground="@drawable/ic_fill"
+        android:src="@drawable/ic_save"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/imgDrawing"
+        app:layout_constraintTop_toBottomOf="@+id/guideline"
+        app:layout_constraintVertical_bias="0.437" />
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/guideline"

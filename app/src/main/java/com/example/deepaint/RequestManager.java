@@ -1,21 +1,13 @@
 package com.example.deepaint;
 
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.os.AsyncTask;
 import android.os.Environment;
-import android.util.Base64;
-
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.MediaType;
@@ -30,25 +22,81 @@ import okio.Okio;
 public class RequestManager {
 
 
-    public static void sendSegmentationRequest() {
+    public static File sendDrawingRequest(Bitmap bitmapToConvert, String fileName) {
+        File[] outFile = new File[1];
         try {
             new Thread(() -> {
                 try {
-                    String requestUrl = "https://2327-34-78-61-205.ngrok.io//drawings";
+                    String requestUrl = "https://2327-34-78-61-205.ngrok.io/drawings";
                     final OkHttpClient client = new OkHttpClient.Builder()
                             .build();
-                    File file = new File(Environment.getExternalStorageDirectory().toString()
-                            + File.separator
-                            + "Download/GokuBigMouth.png");
-                    Bitmap bitmap = BitmapFactory.decodeFile(file.getPath());
                     ByteArrayOutputStream stream = new ByteArrayOutputStream();
-                    bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream);
+                    bitmapToConvert.compress(Bitmap.CompressFormat.JPEG, 100, stream);
                     byte[] byteArray = stream.toByteArray();
-
                     RequestBody requestBody = new MultipartBody.Builder()
                             .setType(MultipartBody.FORM)
-                            .addFormDataPart("img.png", file.getName(),
+                            .addFormDataPart("img.png", fileName,
                                     RequestBody.create(MediaType.parse("image/png"), byteArray))
+                            .build();
+
+                    Request request = new Request.Builder()
+                            .url(requestUrl)
+                            .post(requestBody)
+                            .build();
+                    client.newCall(request).enqueue(new Callback() {
+                        @Override
+                        public void onFailure(Call call, IOException e) {
+                            System.out.println("Request Failed");
+                        }
+
+                        @Override
+                        public void onResponse(Call call, Response response) throws IOException {
+                            if (response.code() == 200) {
+                                System.out.println("Request Success");
+                                String fileNameNoExt = fileName.substring(0, fileName.lastIndexOf('.'));
+                                String downloadPath = Environment.getExternalStorageDirectory().toString()
+                                        + File.separator
+                                        + "Download/" + fileNameNoExt + "_anime.png";
+                                outFile[0] = new File(downloadPath);
+                                BufferedSink sink = Okio.buffer(Okio.sink(outFile[0]));
+                                sink.writeAll(response.body().source());
+                                sink.close();
+                            } else {
+                                System.out.println("Error " + response.code());
+                            }
+                        }
+                    });
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }).start();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return outFile[0];
+    }
+
+    public static void sendDeepFillRequest(Bitmap d1, String fileName1, Bitmap d2, String fileName2) {
+        System.out.println("Deep Fill request...");
+        try {
+            new Thread(() -> {
+                try {
+                    String requestUrl = "https://2327-34-78-61-205.ngrok.io/mask2former";
+                    final OkHttpClient client = new OkHttpClient.Builder()
+                            .build();
+                    ByteArrayOutputStream stream1 = new ByteArrayOutputStream();
+                    d1.compress(Bitmap.CompressFormat.JPEG, 100, stream1);
+                    ByteArrayOutputStream stream2 = new ByteArrayOutputStream();
+                    d2.compress(Bitmap.CompressFormat.JPEG, 100, stream2);
+                    byte[] byteArray1 = stream1.toByteArray();
+                    byte[] byteArray2 = stream2.toByteArray();
+                    RequestBody requestBody = new MultipartBody.Builder()
+                            .setType(MultipartBody.FORM)
+                            .addFormDataPart("img.png", fileName1,
+                                    RequestBody.create(MediaType.parse("image/png"), byteArray1))
+                            .addFormDataPart("img.png", fileName2,
+                                    RequestBody.create(MediaType.parse("image/png"), byteArray2))
                             .build();
 
                     Request request = new Request.Builder()
@@ -64,14 +112,19 @@ public class RequestManager {
 
                         @Override
                         public void onResponse(Call call, Response response) throws IOException {
-                            System.out.println("Request Success");
-                            String downloadPath = Environment.getExternalStorageDirectory().toString()
-                                    + File.separator
-                                    + "Download/download3.png";
-                            File downloadedFile = new File(downloadPath);
-                            BufferedSink sink = Okio.buffer(Okio.sink(downloadedFile));
-                            sink.writeAll(response.body().source());
-                            sink.close();
+                            if (response.code() == 200) {
+                                System.out.println("Request Success");
+                                String fileNameNoExt = fileName1.substring(0, fileName1.lastIndexOf('.'));
+                                String downloadPath = Environment.getExternalStorageDirectory().toString()
+                                        + File.separator
+                                        + "Download/" + fileNameNoExt + "_removed.png";
+                                File downloadedFile = new File(downloadPath);
+                                BufferedSink sink = Okio.buffer(Okio.sink(downloadedFile));
+                                sink.writeAll(response.body().source());
+                                sink.close();
+                            } else {
+                                System.out.println("Error " + response.code());
+                            }
                         }
                     });
                 } catch (Exception e) {
@@ -83,56 +136,6 @@ public class RequestManager {
             e.printStackTrace();
         }
     }
-
-                    /*
-                    System.out.println("JAVA EXECUTION IN BACKGROUND");
-                    String requestUrl = "https://f2b9-34-78-61-205.ngrok.io/drawings";
-                    final OkHttpClient client = new OkHttpClient();
-                    MediaType argbType = MediaType.parse("image/png");
-                    // MediaType JSON = MediaType.parse("application/json;charset=utf-8");
-                    File file = new File(Environment.getExternalStorageDirectory().toString() + File.separator + "Download/GokuBigMouth.png");
-                    RequestBody requestBody = new MultipartBody.Builder()
-                            .setType(MultipartBody.FORM)
-                            .addFormDataPart("image",
-                                    file.getName(),
-                                    RequestBody.create(argbType, file))
-                            .build();
-                    Request segmentationRequest = new Request.Builder()
-                            .url(requestUrl).post(requestBody).build();
-                    Response response = client.newCall(segmentationRequest).execute();
-                    System.out.println("OKHTTP3: Request Success!");
-                    System.out.println(response.body().string());
-                    */
-        // Response response = client.newCall(segmentationRequest).execute();
-        /*
-        System.out.println("SEND WAS EXECUTED IN JAVA");
-        File img = new File(Environment.getExternalStorageDirectory().toString() + File.separator + "Download/GokuBigMouth.png");
-        //File mask = new File("C:\\Users\\alperen\\IdeaProjects\\untitled1\\src\\main\\resources\\style.jpeg");
-        MultipartEntity entity = new MultipartEntity();
-
-        entity.addPart
-
-        HttpPost request = new HttpPost("http://f2b9-34-78-61-205.ngrok.io/drawings");
-        request.setEntity(entity);
-        HttpResponse response = null;
-        String path;
-        File downloadedFile = null;
-        try{
-        HttpClient client = HttpClientBuilder.create().build();
-        response = client.execute(request);
-        path = Environment.getExternalStorageDirectory().toString() + File.separator + "DCIM/"
-                + "out.png";
-        downloadedFile = new File(path);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        try {
-            RequestManager.copyInputStreamToFile(response.getEntity().getContent(), downloadedFile);
-        }
-        finally {
-            response.getEntity().getContent().close();
-        }
-        */
 
     /**
     * Copy an InputStream to a File.

@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">Deepaint</string>
 
-    <string name="label_brush">Brush</string>
+    <string name="label_manual_remove">Manual Remove</string>
     <string name="label_shape">Shape</string>
     <string name="label_oval">Oval</string>
     <string name="label_rectangle">Rectangle</string>

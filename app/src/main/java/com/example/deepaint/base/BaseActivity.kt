@@ -27,14 +27,14 @@ open class BaseActivity : AppCompatActivity() {
         if (!isGranted) {
             if (ActivityCompat.shouldShowRequestPermissionRationale(this,
                             permission)) {
-                showExplanation("Permission Needed for Storage", "We are nice ppl, we wont use it for bad purposes...", Manifest.permission.WRITE_EXTERNAL_STORAGE, READ_WRITE_STORAGE);
+                showExplanation("Permission Needed for Storage", "Please press 'Allow' to give read and limited write access to the application", Manifest.permission.READ_EXTERNAL_STORAGE, READ_WRITE_STORAGE);
             } else {
                 requestPermission(permission, READ_WRITE_STORAGE)
             }
         } else {
             Toast.makeText(this, "Permission (already) Granted!", Toast.LENGTH_SHORT).show();
         }
-        return true
+        return isGranted
     }
 
     private fun requestPermission(permissionName: String, permissionRequestCode: Int) {
