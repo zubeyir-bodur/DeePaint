@@ -34,7 +34,7 @@ open class BaseActivity : AppCompatActivity() {
         } else {
             Toast.makeText(this, "Permission (already) Granted!", Toast.LENGTH_SHORT).show();
         }
-        return isGranted
+        return true
     }
 
     private fun requestPermission(permissionName: String, permissionRequestCode: Int) {

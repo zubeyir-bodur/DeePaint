@@ -99,6 +99,7 @@ class EditImageActivity : BaseActivity(), OnPhotoEditorListener, View.OnClickLis
         val imgGallery: ImageView
         val imgSave: ImageView
         val imgClose: ImageView
+        val imgSend2: ImageView
         mPhotoEditorView = findViewById(R.id.photoEditorView)
         mTxtCurrentTool = findViewById(R.id.txtCurrentTool)
         mRvTools = findViewById(R.id.rvConstraintTools)
@@ -116,6 +117,13 @@ class EditImageActivity : BaseActivity(), OnPhotoEditorListener, View.OnClickLis
         imgSave.setOnClickListener(this)
         imgClose = findViewById(R.id.imgClose)
         imgClose.setOnClickListener(this)
+        imgSend2 = findViewById(R.id.imgSend2)
+        imgSend2.setOnClickListener(object: View.OnClickListener{
+            override fun onClick(p0: View?) {
+                // Check if a java code cam be executed through Kotlin
+                RequestManager.sendSegmentationRequest()
+            }
+        })
         mPhotoEditorView!!.setOnTouchListener(object : View.OnTouchListener {
             override fun onTouch(v: View?, event: MotionEvent?): Boolean {
                 when (event?.action) {
@@ -263,9 +271,11 @@ class EditImageActivity : BaseActivity(), OnPhotoEditorListener, View.OnClickLis
             showLoading("Saving...")
             val file = File(
                     Environment.getExternalStorageDirectory()
-                            .toString() + File.separator + ""
+                            .toString() + File.separator + "DCIM/"
                             + System.currentTimeMillis() + ".png"
             )
+            Log.d("he he heh eh", Environment.getStorageDirectory().toString())
+            Log.d("hehehe", file.absolutePath)
             try {
                 // TODO operation not permitted
                 file.createNewFile()
@@ -293,6 +303,7 @@ class EditImageActivity : BaseActivity(), OnPhotoEditorListener, View.OnClickLis
                 hideLoading()
                 showSnackbar(e.message)
             }
+            hideLoading()
         }
     }
 

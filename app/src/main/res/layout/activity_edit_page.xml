@@ -27,7 +27,9 @@
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:photo_src="@drawable/photobc"
-        />
+        >
+
+    </ja.burhanrashid52.photoeditor.PhotoEditorView>
 
     <ImageView
         android:id="@+id/imgUndo"
@@ -105,14 +107,13 @@
         android:layout_height="wrap_content"
         android:background="@color/tool_bg"
         android:orientation="horizontal"
-        android:paddingBottom="4dp"
         android:paddingTop="4dp"
+        android:paddingBottom="4dp"
         app:layoutManager="LinearLayoutManager"
         app:layout_constraintBottom_toTopOf="@+id/guideline"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        tools:listitem="@layout/row_editing_tools"
-        />
+        tools:listitem="@layout/row_editing_tools" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvFilterView"
@@ -148,6 +149,19 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/guideline"
         />
+
+    <ImageView
+        android:id="@+id/imgSend"
+        android:layout_width="37dp"
+        android:layout_height="39dp"
+        android:layout_marginTop="9dp"
+        android:background="#99000000"
+        android:foreground="@drawable/ic_facebook"
+        android:padding="8dp"
+        android:src="@drawable/ic_undo"
+        app:layout_constraintEnd_toStartOf="@+id/imgSave"
+        app:layout_constraintStart_toEndOf="@+id/txtCurrentTool"
+        app:layout_constraintTop_toBottomOf="@+id/rvConstraintTools" />
 
     <!-- <ImageView
         android:id="@+id/imageView2"
