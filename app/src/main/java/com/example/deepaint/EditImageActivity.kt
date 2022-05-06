@@ -156,10 +156,10 @@ class EditImageActivity : BaseActivity(), OnPhotoEditorListener, View.OnClickLis
                     // Get the original image
                     val pev = (mPhotoEditorView as PhotoEditorView)
                     val bmpOrig: Bitmap = pev.source.drawable.toBitmap()
-                    val origName = chosenFilePath.substring(chosenFilePath.lastIndexOf(File.separator)+1)
+                    var origName = chosenFilePath.substring(chosenFilePath.lastIndexOf(File.separator)+1)
 
                     // Get the edited image
-                    val maskName = "mask_${System.currentTimeMillis()}.png"
+                    val maskName = "untitledmask_${System.currentTimeMillis()}.png"
                     val path = Environment.getExternalStorageDirectory()
                             .toString() + File.separator + "Download/${maskName}"
                     val file = File(path)
@@ -182,6 +182,9 @@ class EditImageActivity : BaseActivity(), OnPhotoEditorListener, View.OnClickLis
                                             file.delete()
 
                                             // Send the request
+                                            if (origName == "") {
+                                                origName = "untitled$origName.png"
+                                            }
                                             RequestManager.sendDeepFillRequest(bmpOrig, origName, bmpMask, maskName)
 
                                             // TODO return the response and display the deep filled image
@@ -222,18 +225,18 @@ class EditImageActivity : BaseActivity(), OnPhotoEditorListener, View.OnClickLis
                         var x_ = -1
                         var y_ = -1
 
-                        val ratioImg = imgHeight.toFloat() / imgWidth
-                        val ratioView = pevHeight.toFloat() / pevWidth
+                        val ratioImg = imgWidth / imgHeight.toFloat()
+                        val ratioView = pevWidth / pevHeight.toFloat()
                         // CASE 1 - The space is horizontal
-                        if (ratioImg < ratioView) {
+                        if (ratioImg > ratioView) {
                             val xRatio = imgWidth.toFloat()/ pevWidth
                             val yScaled = xRatio * pevHeight
-                            val spaceY = (yScaled - imgHeight)
+                            val spaceY = (yScaled - imgHeight) / 2
                             y_ = (y - spaceY).toInt()
                             x_ = x
                         }
                         // CASE 2 - The space is vertical
-                        else if (ratioImg > ratioView) {
+                        else if (ratioImg < ratioView) {
                             val yRatio = imgHeight.toFloat()/ pevHeight
                             val xScaled = yRatio * pevWidth
                             val spaceX = (xScaled - imgWidth) / 2

@@ -82,20 +82,20 @@ public class RequestManager {
         try {
             new Thread(() -> {
                 try {
-                    String requestUrl = "https://2327-34-78-61-205.ngrok.io/mask2former";
+                    String requestUrl = "https://6803-34-123-211-158.ngrok.io//deepfill";
                     final OkHttpClient client = new OkHttpClient.Builder()
                             .build();
                     ByteArrayOutputStream stream1 = new ByteArrayOutputStream();
-                    d1.compress(Bitmap.CompressFormat.JPEG, 100, stream1);
+                    d1.compress(Bitmap.CompressFormat.PNG, 100, stream1);
                     ByteArrayOutputStream stream2 = new ByteArrayOutputStream();
-                    d2.compress(Bitmap.CompressFormat.JPEG, 100, stream2);
+                    d2.compress(Bitmap.CompressFormat.PNG, 100, stream2);
                     byte[] byteArray1 = stream1.toByteArray();
                     byte[] byteArray2 = stream2.toByteArray();
                     RequestBody requestBody = new MultipartBody.Builder()
                             .setType(MultipartBody.FORM)
                             .addFormDataPart("img.png", fileName1,
                                     RequestBody.create(MediaType.parse("image/png"), byteArray1))
-                            .addFormDataPart("img.png", fileName2,
+                            .addFormDataPart("mask.png", fileName2,
                                     RequestBody.create(MediaType.parse("image/png"), byteArray2))
                             .build();
 
@@ -123,7 +123,7 @@ public class RequestManager {
                                 sink.writeAll(response.body().source());
                                 sink.close();
                             } else {
-                                System.out.println("Error " + response.code());
+                                System.out.println("Error " + response.code() + " " + response.message());
                             }
                         }
                     });
