@@ -46,6 +46,15 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Deepaint">
         <activity
+            android:name=".MainPageActivity"
+            android:exported="false" />
+        <activity
+            android:name=".RegisterActivity"
+            android:exported="false" />
+        <activity
+            android:name=".AuthPageActivity"
+            android:exported="false" />
+        <activity
             android:name=".EditPage"
             android:exported="false" />
         <activity
@@ -58,6 +67,10 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <meta-data
+            android:name="preloaded_fonts"
+            android:resource="@array/preloaded_fonts" />
     </application>
     -->
 

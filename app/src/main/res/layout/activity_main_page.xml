@@ -4,9 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/backg"
-    tools:context=".MainActivity">
-
+    tools:context=".MainPageActivity">
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/welcomeScreen"
         android:layout_width="match_parent"
@@ -86,8 +84,7 @@
         android:layout_height="match_parent"
         android:background="#CA3B3B"
         android:backgroundTint="#0F0F0F"
-        tools:context=".EditPage"
-        tools:visibility="visible">
+        tools:context=".EditPage">
 
         <ImageView
             android:id="@+id/imageView3"
@@ -208,7 +205,4 @@
             tools:ignore="SpeakableTextPresentCheck" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
-
-
 </androidx.constraintlayout.widget.ConstraintLayout>
-

@@ -20,7 +20,6 @@ import android.provider.MediaStore;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import java.io.File;
@@ -30,14 +29,15 @@ import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-public class MainActivity extends AppCompatActivity {
+public class MainPageActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_main_page);
         findViewById(R.id.editScreen).setVisibility(View.GONE);
         init();
+
     }
 
     private static final int REQUEST_PERMISSIONS = 1234;
@@ -59,7 +59,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onResume() {
+    protected void onResume(){
         super.onResume();
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && notPermissions()){
             requestPermissions(PERMISSIONS, REQUEST_PERMISSIONS);
@@ -75,14 +75,75 @@ public class MainActivity extends AppCompatActivity {
                 recreate();
             }
         }
-        startActivity(new Intent(MainActivity.this, AuthPageActivity.class));
     }
+
+    private static final int REQUEST_PICK_IMAGE = 12345;
+    private ImageView imageView;
+    private void init(){
+
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.N){
+            StrictMode.VmPolicy.Builder builder = new StrictMode.VmPolicy.Builder();
+            StrictMode.setVmPolicy(builder.build());
+        }
+
+        imageView = findViewById(R.id.imageView3);
+
+        if(!MainPageActivity.this.getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA)){
+            findViewById(R.id.openCameraButton).setVisibility(View.GONE);
+        }
+
+        final Button openCameraButton = findViewById(R.id.openCameraButton);
+
+        openCameraButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                final Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                if(takePictureIntent.resolveActivity(getPackageManager())!= null){
+                    //create a file for the photo that was just taken
+                    final File photoFile = createImageFile();
+                    imageUri = Uri.fromFile(photoFile);
+                    final SharedPreferences myPrefs = getSharedPreferences(appID,0 );
+                    myPrefs.edit().putString("path", photoFile.getAbsolutePath()).apply();
+                    takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, imageUri);
+                    startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
+                }
+                else{
+                    Toast.makeText(MainPageActivity.this, "Your Camera app is not compatible",
+                            Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+
+
+        final Button galleryButton = findViewById(R.id.galleryButton);
+
+        galleryButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                final Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+                intent.setType("image/*");
+                final Intent pickIntent = new Intent(Intent.ACTION_PICK);
+                pickIntent.setDataAndType(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, "image/*");
+                final Intent chooserIntent  = Intent.createChooser(intent, "Choose from Gallery");
+                startActivityForResult(chooserIntent, REQUEST_PICK_IMAGE);
+            }
+        });
+
+        final Button objectsButton = findViewById(R.id.objectsButton);
+
+        final Button backButton = findViewById(R.id.buttonBack);
 
         backButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                findViewById(R.id.welcomeScreen).setVisibility(View.VISIBLE);
-                findViewById(R.id.editScreen).setVisibility(View.GONE);
+                //findViewById(R.id.welcomeScreen).setVisibility(View.VISIBLE);
+                //findViewById(R.id.editScreen).setVisibility(View.GONE);
+                final Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+                intent.setType("image/*");
+                final Intent pickIntent = new Intent(Intent.ACTION_PICK);
+                pickIntent.setDataAndType(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, "image/*");
+                final Intent chooserIntent  = Intent.createChooser(intent, "Choose from Gallery");
+                startActivityForResult(chooserIntent, REQUEST_PICK_IMAGE);
             }
         });
 
@@ -112,7 +173,6 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
 
-        //hello world
         if(requestCode == REQUEST_IMAGE_CAPTURE){
             if(imageUri == null){
                 final SharedPreferences p = getSharedPreferences(appID, 0);
@@ -135,13 +195,12 @@ public class MainActivity extends AppCompatActivity {
             imageUri = data.getData();
         }
 
-        final ProgressDialog dialog = ProgressDialog.show(MainActivity.this, "Loading",
+        final ProgressDialog dialog = ProgressDialog.show(MainPageActivity.this, "Loading",
                 "Please Wait", true );
 
 
 
         editMode = true;
-
 
         findViewById(R.id.welcomeScreen).setVisibility(View.GONE);
         findViewById(R.id.editScreen).setVisibility(View.VISIBLE);
@@ -190,6 +249,5 @@ public class MainActivity extends AppCompatActivity {
         }.start();
 
 
-    
-
+    }
 }
