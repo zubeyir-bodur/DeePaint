@@ -35,11 +35,10 @@ class PropertiesBSFragment : BottomSheetDialogFragment(), OnSeekBarChangeListene
 
     override fun onViewCreated(@NonNull view: View, @Nullable savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        val rvColor: RecyclerView = view.findViewById(R.id.rvColors)
-        val sbOpacity = view.findViewById<SeekBar>(R.id.sbOpacity)
         val sbBrushSize = view.findViewById<SeekBar>(R.id.sbSize)
-        sbOpacity.setOnSeekBarChangeListener(this)
         sbBrushSize.setOnSeekBarChangeListener(this)
+        /*
+        val rvColor: RecyclerView = view.findViewById(R.id.rvColors)
         val layoutManager =
                 LinearLayoutManager(getActivity(), LinearLayoutManager.HORIZONTAL, false)
         rvColor.setLayoutManager(layoutManager)
@@ -53,7 +52,7 @@ class PropertiesBSFragment : BottomSheetDialogFragment(), OnSeekBarChangeListene
                 }
             }
         })
-        rvColor.setAdapter(colorPickerAdapter)
+        rvColor.setAdapter(colorPickerAdapter)*/
     }
 
     fun setPropertiesChangeListener(properties: Properties?) {
@@ -62,9 +61,6 @@ class PropertiesBSFragment : BottomSheetDialogFragment(), OnSeekBarChangeListene
 
     override fun onProgressChanged(seekBar: SeekBar, i: Int, b: Boolean) {
         when (seekBar.id) {
-            R.id.sbOpacity -> if (mProperties != null) {
-                mProperties!!.onOpacityChanged(i)
-            }
             R.id.sbSize -> if (mProperties != null) {
                 mProperties!!.onBrushSizeChanged(i)
             }

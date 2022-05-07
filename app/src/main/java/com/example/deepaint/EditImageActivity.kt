@@ -69,12 +69,14 @@ class EditImageActivity : BaseActivity(), OnPhotoEditorListener, View.OnClickLis
     private var bitmapMask : Bitmap? = null
     var cameraUri : Uri? = null
     private var context = this
+    private var fileNameNoExt = ""
+    private var fileExt = ""
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         makeFullScreen()
         setContentView(R.layout.activity_edit_image)
         initViews()
-        mWonderFont = Typeface.createFromAsset(getAssets(), "beyond_wonderland.ttf")
+        mWonderFont = Typeface.createFromAsset(assets, "beyond_wonderland.ttf")
         mPropertiesBSFragment = PropertiesBSFragment()
         mEmojiBSFragment = EmojiBSFragment()
         mStickerBSFragment = StickerBSFragment()
@@ -87,124 +89,113 @@ class EditImageActivity : BaseActivity(), OnPhotoEditorListener, View.OnClickLis
         val llmFilters = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
         mRvFilters!!.setLayoutManager(llmFilters)
         mRvFilters!!.setAdapter(mFilterViewAdapter)
-
-
-
-
-        //Typeface mTextRobotoTf = ResourcesCompat.getFont(this, R.font.roboto_medium);
-        //Typeface mEmojiTypeFace = Typeface.createFromAsset(getAssets(), "emojione-android.ttf");
         mPhotoEditor = PhotoEditor.Builder(this, mPhotoEditorView!!)
-                .setPinchTextScalable(true) // set flag to make text scalable when pinch
-                //.setDefaultTextTypeface(mTextRobotoTf)
-                //.setDefaultEmojiTypeface(mEmojiTypeFace)
-                .build() // build photo editor sdk
+                .setPinchTextScalable(true)
+                .build()
         mPhotoEditor!!.setOnPhotoEditorListener(this)
 
-        //Set Image Dynamically
-        // mPhotoEditorView.getSource().setImageResource(R.drawable.color_palette);
+        // Brush color is always white
+        mPhotoEditor!!.brushColor = 0x00FFFFFF
+        mPhotoEditor!!.setBrushDrawingMode(false)
+
+        // Warming message
+        val builder = AlertDialog.Builder(this)
+        builder.setTitle("Welcome!")
+        builder.setMessage("Welcome to DeePaint! Please choose an image from your phone to get started1")
+        builder.setNeutralButton("Got It!") { dialog, which ->
+            findViewById<ImageView>(R.id.imgGallery).performClick()
+        }
+        builder.show()
     }
 
-    @SuppressLint("ClickableViewAccessibility")
+    @SuppressLint("ClickableViewAccessibility", "MissingPermission")
     private fun initViews() {
-        val imgUndo: ImageView
-        val imgRedo: ImageView
-        val imgCamera: ImageView
-        val imgGallery: ImageView
-        val imgSave: ImageView
-        val imgClose: ImageView
-        val imgDrawing: ImageView
         mPhotoEditorView = findViewById(R.id.photoEditorView)
         mTxtCurrentTool = findViewById(R.id.txtCurrentTool)
         mRvTools = findViewById(R.id.rvConstraintTools)
         mRvFilters = findViewById(R.id.rvFilterView)
         mRootView = findViewById(R.id.rootView)
-        imgUndo = findViewById(R.id.imgUndo)
+
+        val imgUndo: ImageView = findViewById(R.id.imgUndo)
         imgUndo.setOnClickListener(this)
-        imgRedo = findViewById(R.id.imgRedo)
+        val imgRedo: ImageView = findViewById(R.id.imgRedo)
         imgRedo.setOnClickListener(this)
-        imgCamera = findViewById(R.id.imgCamera)
+        val imgCamera: ImageView = findViewById(R.id.imgCamera)
         imgCamera.setOnClickListener(this)
-        imgGallery = findViewById(R.id.imgGallery)
+        val imgGallery: ImageView = findViewById(R.id.imgGallery)
         imgGallery.setOnClickListener(this)
-        imgSave = findViewById(R.id.imgSave)
+        val imgSave: ImageView = findViewById(R.id.imgSave)
         imgSave.setOnClickListener(this)
-        imgClose = findViewById(R.id.imgClose)
+        val imgClose: ImageView = findViewById(R.id.imgClose)
         imgClose.setOnClickListener(this)
-        imgDrawing = findViewById(R.id.imgDrawing)
-        imgDrawing.setOnClickListener(object: View.OnClickListener{
-            override fun onClick(p0: View?) {
-                // Send a drawing request for this image
-                Log.d("ChosenFilepath", chosenFilePath)
-                val fileName = chosenFilePath.substring(chosenFilePath.lastIndexOf(File.separator)+1)
-                var fileNameNoExt = ""
-                if (fileName != "")
-                    fileNameNoExt = fileName.substring(0, fileName.lastIndexOf('.'))
-                val bmp = (mPhotoEditorView as PhotoEditorView).source.drawable.toBitmap()
-                var outfile : File? = RequestManager.sendDrawingRequest(bmp, fileName)
-                showLoading("Processing")
+        val imgFill = findViewById<ImageView>(R.id.imgFill)
+        imgFill.setOnClickListener { // Get the edited image
+            var bmpMask: Bitmap
+            // Get the original image
+            val pev = (mPhotoEditorView as PhotoEditorView)
+            val bmpOrig: Bitmap = pev.source.drawable.toBitmap()
+            var origName = chosenFilePath.substring(chosenFilePath.lastIndexOf(File.separator) + 1)
+
+            val isDirty = !mPhotoEditor!!.isCacheEmpty
+            if (isDirty) {
+                // Get the edited image
+                val maskName = "mask_${System.currentTimeMillis()}.png"
+                val path = Environment.getExternalStorageDirectory()
+                        .toString() + File.separator + "Download/${maskName}"
+                val file = File(path)
+                if (requestPermissionEdit(Manifest.permission.READ_EXTERNAL_STORAGE)) {
+                    try {
+                        file.createNewFile()
+                        val saveSettings: SaveSettings = SaveSettings.Builder()
+                                .setClearViewsEnabled(true)
+                                .setTransparencyEnabled(true)
+                                .build()
+                        mPhotoEditor!!.saveAsFile(
+                                file.absolutePath,
+                                saveSettings,
+                                object : PhotoEditor.OnSaveListener {
+                                    override fun onSuccess(@NonNull imagePath: String) {
+                                        // Save it to a bitmap
+                                        bmpMask = BitmapFactory.decodeFile(path)
+
+                                        // Send the request
+                                        if (origName == "") {
+                                            origName = "untitled$origName.png"
+                                        }
+                                        RequestManager.sendDeepFillRequest(bmpOrig, origName, bmpMask, maskName)
+
+                                        // Delete the file - it was not meant to save it
+                                        file.delete()
+                                        showLoading("Processing")
+                                    }
+
+                                    override fun onFailure(@NonNull exception: Exception) {
+                                        Log.d("Failure on filling", exception.toString())
+                                    }
+                                })
+                    } catch (e: IOException) {
+                        e.printStackTrace()
+                    }
+                }
                 Handler().postDelayed({
                     hideLoading()
-                    val outFilePath = (Environment.getExternalStorageDirectory().toString()
+                    val removedPath = (Environment.getExternalStorageDirectory().toString()
                             + File.separator
-                            + "Download/" + fileNameNoExt + "_anime.png")
-                    mPhotoEditorView!!.source.setImageURI(Uri.fromFile(File(outFilePath)))
-                },5000)
-            }
-        })
-        val imgFill = findViewById<ImageView>(R.id.imgFill)
-        imgFill.setOnClickListener(object: View.OnClickListener{
-                @SuppressLint("MissingPermission")
-                override fun onClick(p0: View?) {
-                    // Get the edited image
-                    var bmpMask: Bitmap
-
-                    // Get the original image
-                    val pev = (mPhotoEditorView as PhotoEditorView)
-                    val bmpOrig: Bitmap = pev.source.drawable.toBitmap()
-                    var origName = chosenFilePath.substring(chosenFilePath.lastIndexOf(File.separator)+1)
-
-                    // Get the edited image
-                    val maskName = "untitledmask_${System.currentTimeMillis()}.png"
-                    val path = Environment.getExternalStorageDirectory()
-                            .toString() + File.separator + "Download/${maskName}"
-                    val file = File(path)
-                    if (requestPermissionEdit(Manifest.permission.READ_EXTERNAL_STORAGE)) {
-                        try {
-                            file.createNewFile()
-                            val saveSettings: SaveSettings = SaveSettings.Builder()
-                                    .setClearViewsEnabled(true)
-                                    .setTransparencyEnabled(true)
-                                    .build()
-                            mPhotoEditor!!.saveAsFile(
-                                    file.absolutePath,
-                                    saveSettings,
-                                    object : PhotoEditor.OnSaveListener {
-                                        override fun onSuccess(@NonNull imagePath: String) {
-                                            // Save it to a bitmap
-                                            bmpMask = BitmapFactory.decodeFile(path)
-
-                                            // Delete the file - it was not meant to save it
-                                            file.delete()
-
-                                            // Send the request
-                                            if (origName == "") {
-                                                origName = "untitled$origName.png"
-                                            }
-                                            RequestManager.sendDeepFillRequest(bmpOrig, origName, bmpMask, maskName)
-
-                                            // TODO return the response and display the deep filled image
-                                        }
-
-                                        override fun onFailure(@NonNull exception: Exception) {
-                                            Log.d("Failure on filling", exception.toString())
-                                        }
-                                    })
-                        } catch (e: IOException) {
-                            e.printStackTrace()
-                        }
+                            + "Download/" + fileNameNoExt + "_removed.png")
+                    val removeFile = File(removedPath)
+                    if (removeFile.isFile) {
+                        val bitmapRemoved = BitmapFactory.decodeFile(removeFile.absolutePath)
+                        mPhotoEditorView!!.source.setImageBitmap(bitmapRemoved)
+                        Toast.makeText(applicationContext, "Success!", Toast.LENGTH_LONG).show()
+                    } else {
+                        Toast.makeText(applicationContext, "Unsuccessful...", Toast.LENGTH_LONG).show()
                     }
+                }, 10000)
             }
-        })
+            else {
+                showSnackbar("Please draw a mask to deep-fill the region...")
+            }
+        }
         mPhotoEditorView!!.setOnTouchListener(object : View.OnTouchListener {
             override fun onTouch(v: View?, event: MotionEvent?): Boolean {
                 when (event?.action) {
@@ -225,8 +216,8 @@ class EditImageActivity : BaseActivity(), OnPhotoEditorListener, View.OnClickLis
 
                             val relative_img_width = pevWidth
                             val relative_img_height = pevWidth*imgHeight/imgWidth
-                            var x = eventXY[0].toInt()
-                            var y = eventXY[1].toInt()
+                            val x = eventXY[0].toInt()
+                            val y = eventXY[1].toInt()
                             val relative_img_x= x*imgWidth/pevWidth
                             val relative_img_Y= (y - (pevHeight-relative_img_height)/2)*imgHeight/relative_img_height
                             Log.d("drawable size: ",
@@ -241,7 +232,8 @@ class EditImageActivity : BaseActivity(), OnPhotoEditorListener, View.OnClickLis
                                 val labelColor = bitmapMask!!.getPixel(relative_img_x, relative_img_Y)
                                 Log.d("Label Color Value in 32 bits", labelColor.toString())
                                 val labelHex = Integer.toHexString(labelColor)
-                                var labelNo = Integer.decode(labelHex.substring(7, 8))
+                                var labelString = labelHex.substring(6, 8)
+                                var labelNo = Integer.decode(labelString[0].toString()) * 16 + Integer.decode(labelString[1].toString())
                                 Log.d("Label No", labelNo.toString())
 
                                 val builder = AlertDialog.Builder(context)
@@ -254,21 +246,34 @@ class EditImageActivity : BaseActivity(), OnPhotoEditorListener, View.OnClickLis
                                 builder.setPositiveButton("Yes") { dialog, which ->
                                     Toast.makeText(applicationContext,
                                             "Done!", Toast.LENGTH_SHORT).show()
-                                    // TODO
-                                    RequestManager.sendAutoRemoveRequest()
+                                    showLoading("Processing")
+                                    val bitmapOrig = BitmapFactory.decodeFile(chosenFilePath)
+                                    RequestManager.sendAutoRemoveRequest(labelNo, bitmapMask, bitmapOrig, fileNameNoExt)
+                                    Handler().postDelayed(
+                                            {
+                                                hideLoading()
+                                                val removedPath = (Environment.getExternalStorageDirectory().toString()
+                                                        + File.separator
+                                                        + "Download/" + fileNameNoExt + "_auto_removed.png")
+                                                val removeFile = File(removedPath)
+                                                if (removeFile.isFile) {
+                                                    val bitmapRemoved = BitmapFactory.decodeFile(removeFile.absolutePath)
+                                                    Toast.makeText(applicationContext,"Success!",Toast.LENGTH_LONG).show()
+
+                                                    // The user have removed an object, now we move on w/ new image
+                                                    mPhotoEditorView!!.source.setImageBitmap(bitmapRemoved)
+                                                    chosenFilePath = removeFile.absolutePath
+                                                    fileNameNoExt += "_auto_removed"
+                                                    fileExt = "png"
+                                                    isAutoRemove = false
+                                                } else {
+                                                    Toast.makeText(applicationContext,"Unsuccessful...",Toast.LENGTH_LONG).show()
+                                                }
+                                    }, 10000)
                                 }
                                 builder.show()
                             }
                         }
-
-                        // TODO if the touched points
-
-                        // TODO send a request to check if the region
-                        //  is contained by a segmented region
-                        //  actual coordinates in the image is (x, y)
-                        //   can record these coordinates in an array
-                        //   and send a single request when
-                        //   , say, delete selected objects button is pressed
                         return true
                     }
                 }
@@ -330,7 +335,24 @@ class EditImageActivity : BaseActivity(), OnPhotoEditorListener, View.OnClickLis
             R.id.imgUndo -> mPhotoEditor!!.undo()
             R.id.imgRedo -> mPhotoEditor!!.redo()
             R.id.imgSave -> saveImage()
-            R.id.imgClose -> onBackPressed()
+            R.id.imgClose -> {
+                // Clear all the masks drawn
+                mPhotoEditor!!.clearAllViews()
+
+                // Disable drawing
+                mPhotoEditor!!.setBrushDrawingMode(false)
+                mTxtCurrentTool!!.setText(R.string.app_name)
+
+                // Quit from segmentation mode, if any
+                if (isAutoRemove) {
+                    val oldPath = (Environment.getExternalStorageDirectory().toString()
+                            + File.separator
+                            + "Download/" + fileNameNoExt + ".${fileExt}")
+                    val bmp = BitmapFactory.decodeFile(oldPath)
+                    mPhotoEditorView!!.source.setImageBitmap(bmp)
+                    isAutoRemove = false
+                }
+            }
             R.id.imgCamera -> {
                 val cameraIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
                 val values = ContentValues()
@@ -358,7 +380,7 @@ class EditImageActivity : BaseActivity(), OnPhotoEditorListener, View.OnClickLis
             showLoading("Saving...")
             val file = File(
                     Environment.getExternalStorageDirectory()
-                            .toString() + File.separator + "DCIM/"
+                            .toString() + File.separator + "Download/"
                             + System.currentTimeMillis() + ".png"
             )
             try {
@@ -413,14 +435,16 @@ class EditImageActivity : BaseActivity(), OnPhotoEditorListener, View.OnClickLis
                 PICK_REQUEST -> try {
                     mPhotoEditor!!.clearAllViews()
                     val uri = data!!.data
-
-                    var filePath = ""
                     val wholeID = DocumentsContract.getDocumentId(uri)
 
                     // Split at colon, use second item in the array
                     val id = wholeID.split(":")[1]
                     chosenFilePath =  Environment.getExternalStorageDirectory()
                             .toString() + File.separator + id
+                    val filename: String = chosenFilePath.substring(chosenFilePath.lastIndexOf("/") + 1)
+                    val dotIndex: Int = filename.lastIndexOf('.')
+                    fileNameNoExt = (if (dotIndex == -1) filename else filename.substring(0, dotIndex))
+                    fileExt = filename.substring(dotIndex + 1)
                     Log.d("Chosen: ", chosenFilePath)
                     val bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), uri)
                     mPhotoEditorView!!.source.setImageBitmap(bitmap)
@@ -433,17 +457,17 @@ class EditImageActivity : BaseActivity(), OnPhotoEditorListener, View.OnClickLis
 
     override fun onColorChanged(colorCode: Int) {
         mPhotoEditor!!.brushColor = colorCode
-        mTxtCurrentTool!!.setText(R.string.label_manual_remove)
+        mTxtCurrentTool!!.setText(R.string.label_draw_mask)
     }
 
     override fun onOpacityChanged(opacity: Int) {
         mPhotoEditor!!.setOpacity(opacity)
-        mTxtCurrentTool!!.setText(R.string.label_manual_remove)
+        mTxtCurrentTool!!.setText(R.string.label_draw_mask)
     }
 
     override fun onBrushSizeChanged(brushSize: Int) {
         mPhotoEditor!!.brushSize = brushSize.toFloat()
-        mTxtCurrentTool!!.setText(R.string.label_manual_remove)
+        mTxtCurrentTool!!.setText(R.string.label_draw_mask)
     }
 
     override fun onEmojiClick(emojiUnicode: String?) {
@@ -455,12 +479,6 @@ class EditImageActivity : BaseActivity(), OnPhotoEditorListener, View.OnClickLis
         mPhotoEditor!!.addImage(bitmap)
         mTxtCurrentTool!!.setText(R.string.label_sticker)
     }
-    /*
-    override fun isPermissionGranted(isGranted: Boolean, permission: String?) {
-        if (isGranted) {
-            saveImage()
-        }
-    }*/
 
     @RequiresApi(Build.VERSION_CODES.M)
     private fun showSaveDialog() {
@@ -481,10 +499,9 @@ class EditImageActivity : BaseActivity(), OnPhotoEditorListener, View.OnClickLis
 
     override fun onToolSelected(toolType: ToolType?) {
         when (toolType) {
-            // TODO Add buttons for tasks here
             ToolType.BRUSH -> {
                 mPhotoEditor!!.setBrushDrawingMode(true)
-                mTxtCurrentTool!!.setText(R.string.label_manual_remove)
+                mTxtCurrentTool!!.setText(R.string.label_draw_mask)
                 mPropertiesBSFragment!!.show(
                         getSupportFragmentManager(),
                         mPropertiesBSFragment!!.getTag()
@@ -514,10 +531,11 @@ class EditImageActivity : BaseActivity(), OnPhotoEditorListener, View.OnClickLis
                     mStickerBSFragment!!.getTag()
             )
             ToolType.SEGMENT -> {
+                mTxtCurrentTool!!.setText(R.string.label_segmentate)
                 Log.d("segment", "clicked")
                 Log.d("ChosenFilepath", chosenFilePath)
                 val fileName = chosenFilePath.substring(chosenFilePath.lastIndexOf(File.separator)+1)
-                var fileNameNoExt = ""
+                fileNameNoExt = ""
                 if (fileName != "")
                     fileNameNoExt = fileName.substring(0, fileName.lastIndexOf('.'))
                 val bmp = (mPhotoEditorView as PhotoEditorView).source.drawable.toBitmap()
@@ -534,16 +552,16 @@ class EditImageActivity : BaseActivity(), OnPhotoEditorListener, View.OnClickLis
                         Log.d("Does the zip file Exist? ", outFile.isFile().toString())
                         UnzipUtils.unzip(outFile, (Environment.getExternalStorageDirectory().toString()
                                 + File.separator
-                                + "DCIM"))
+                                + "Download"))
                         // mPhotoEditorView!!.source.setImageURI(Uri.fromFile(File(outFilePath)))
                         val predFile : File = File((Environment.getExternalStorageDirectory().toString()
                                 + File.separator
-                                + "DCIM/${fileNameNoExt}._pred.png"))
+                                + "Download/${fileNameNoExt}_pred.png"))
                         val maskFile : File = File((Environment.getExternalStorageDirectory().toString()
                                 + File.separator
-                                + "DCIM/${fileNameNoExt}._pred_masks.png"))
+                                + "Download/${fileNameNoExt}_pred_masks.png"))
                         var bitmapPred = BitmapFactory.decodeFile(predFile.absolutePath)
-                        chosenFilePath = predFile.absolutePath
+                        // chosenFilePath = predFile.absolutePath
                         mPhotoEditorView!!.source.setImageBitmap(bitmapPred)
                         bitmapMask = BitmapFactory.decodeFile(maskFile.absolutePath)
 
@@ -563,6 +581,15 @@ class EditImageActivity : BaseActivity(), OnPhotoEditorListener, View.OnClickLis
                         e.printStackTrace()
                     }
                 },8000)
+            }
+            ToolType.SKETCH -> {
+                drawingProcess()
+            }
+            ToolType.STYLIZE -> {
+                // TODO
+                //  1 - Open gallery again, but save the original image path
+                //  2 - Send a stylizing request with target image as old path
+                //      with reference image as new path
             }
         }
     }
@@ -606,12 +633,33 @@ class EditImageActivity : BaseActivity(), OnPhotoEditorListener, View.OnClickLis
         }
     }
 
+    private fun drawingProcess() {
+        Log.d("ChosenFilepath", chosenFilePath)
+        val fileName = chosenFilePath.substring(chosenFilePath.lastIndexOf(File.separator) + 1)
+        var fileNameNoExt = ""
+        if (fileName != "")
+            fileNameNoExt = fileName.substring(0, fileName.lastIndexOf('.'))
+        val bmp = (mPhotoEditorView as PhotoEditorView).source.drawable.toBitmap()
+        RequestManager.sendDrawingRequest(bmp, fileName)
+        showLoading("Processing")
+        Handler().postDelayed({
+            hideLoading()
+            val outFilePath = (Environment.getExternalStorageDirectory().toString()
+                    + File.separator
+                    + "Download/" + fileNameNoExt + "_anime.png")
+            val outFile : File = File(outFilePath)
+            if (outFile.isFile)
+                mPhotoEditorView!!.source.setImageURI(Uri.fromFile(File(outFilePath)))
+            else {
+                showSnackbar("Sketching failed...")
+            }
+        }, 5000)
+    }
+
     companion object {
         private val TAG = EditImageActivity::class.java.simpleName
         const val EXTRA_IMAGE_PATHS = "extra_image_paths"
         private const val CAMERA_REQUEST = 52
         private const val PICK_REQUEST = 53
     }
-
-
 }

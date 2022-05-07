@@ -4,10 +4,7 @@ import android.graphics.Bitmap;
 import android.os.Environment;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.MediaType;
@@ -20,10 +17,7 @@ import okio.BufferedSink;
 import okio.Okio;
 
 public class RequestManager {
-
-
-    public static File sendDrawingRequest(Bitmap bitmapToConvert, String fileName) {
-        File[] outFile = new File[1];
+    public static void sendDrawingRequest(Bitmap bitmapToConvert, String fileName) {
         try {
             new Thread(() -> {
                 try {
@@ -52,13 +46,14 @@ public class RequestManager {
                         @Override
                         public void onResponse(Call call, Response response) throws IOException {
                             if (response.code() == 200) {
+                                File outFile;
                                 System.out.println("Request Success");
                                 String fileNameNoExt = fileName.substring(0, fileName.lastIndexOf('.'));
                                 String downloadPath = Environment.getExternalStorageDirectory().toString()
                                         + File.separator
                                         + "Download/" + fileNameNoExt + "_anime.png";
-                                outFile[0] = new File(downloadPath);
-                                BufferedSink sink = Okio.buffer(Okio.sink(outFile[0]));
+                                outFile = new File(downloadPath);
+                                BufferedSink sink = Okio.buffer(Okio.sink(outFile));
                                 sink.writeAll(response.body().source());
                                 sink.close();
                             } else {
@@ -74,7 +69,6 @@ public class RequestManager {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return outFile[0];
     }
 
     public static void sendDeepFillRequest(Bitmap d1, String fileName1, Bitmap d2, String fileName2) {
@@ -82,7 +76,7 @@ public class RequestManager {
         try {
             new Thread(() -> {
                 try {
-                    String requestUrl = "https://6803-34-123-211-158.ngrok.io//deepfill";
+                    String requestUrl = "https://0d62-34-134-235-96.ngrok.io/deepfill";
                     final OkHttpClient client = new OkHttpClient.Builder()
                             .build();
                     ByteArrayOutputStream stream1 = new ByteArrayOutputStream();
@@ -142,7 +136,7 @@ public class RequestManager {
         try {
             new Thread(() -> {
                 try {
-                    String requestUrl = "https://ae71-35-238-204-175.ngrok.io/segmentate";
+                    String requestUrl = "https://7ab6-35-221-228-167.ngrok.io/segmentate";
                     final OkHttpClient client = new OkHttpClient.Builder()
                             .build();
                     ByteArrayOutputStream stream = new ByteArrayOutputStream();
@@ -191,43 +185,68 @@ public class RequestManager {
         }
     }
 
-    public static void sendAutoRemoveRequest() {
-        // TODO
-    }
-
-    /**
-    * Copy an InputStream to a File.
-     * @Deprecated
-    */
-    @Deprecated
-    private static void copyInputStreamToFile(InputStream in, File file) {
-        OutputStream out = null;
-
+    public static void sendAutoRemoveRequest(int labelNo, Bitmap mask, Bitmap mapWithImg, String fileNameNoExt) {
+        System.out.println("Auto Fill Request...");
         try {
-            out = new FileOutputStream(file);
-            byte[] buf = new byte[1024];
-            int len;
-            while((len=in.read(buf))>0){
-                out.write(buf,0,len);
-            }
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-        }
-        finally {
-            // Ensure that the InputStreams are closed even if there's an exception.
-            try {
-                if ( out != null ) {
-                    out.close();
-                }
+            new Thread(() -> {
+                try {
+                    String requestUrl = "https://4671-34-134-235-96.ngrok.io/deepfillauto";
+                    final OkHttpClient client = new OkHttpClient.Builder()
+                            .build();
+                    ByteArrayOutputStream stream1 = new ByteArrayOutputStream();
+                    mask.compress(Bitmap.CompressFormat.PNG, 100, stream1);
+                    ByteArrayOutputStream stream2 = new ByteArrayOutputStream();
+                    mapWithImg.compress(Bitmap.CompressFormat.PNG, 100, stream2);
+                    byte[] byteArray1 = stream1.toByteArray();
+                    byte[] byteArray2 = stream2.toByteArray();
+                    String fileName1 = fileNameNoExt + "_pred_masks.png";
+                    String fileName2 = fileNameNoExt + "_pred.png";
+                    RequestBody requestBody = new MultipartBody.Builder()
+                            .setType(MultipartBody.FORM)
+                            .addFormDataPart("img.png", fileName1,
+                                    RequestBody.create(MediaType.parse("image/png"), byteArray2))
+                            .addFormDataPart("mask.png", fileName2,
+                                    RequestBody.create(MediaType.parse("image/png"), byteArray1))
+                            .addFormDataPart("label.json", fileNameNoExt + ".json",
+                                    RequestBody.create(MediaType.parse("application-type/json"), "{\n" +
+                                            "  \"labelNo\": " + labelNo + " \n" +
+                                            "}"))
+                            .build();
 
-                // If you want to close the "in" InputStream yourself then remove this
-                // from here but ensure that you close it yourself eventually.
-                in.close();
-            }
-            catch ( IOException e ) {
-                e.printStackTrace();
-            }
+                    Request request = new Request.Builder()
+                            .url(requestUrl)
+                            .post(requestBody)
+                            .build();
+
+                    client.newCall(request).enqueue(new Callback() {
+                        @Override
+                        public void onFailure(Call call, IOException e) {
+                            System.out.println("Request Failed");
+                        }
+
+                        @Override
+                        public void onResponse(Call call, Response response) throws IOException {
+                            if (response.code() == 200) {
+                                System.out.println("Request Success");
+                                String downloadPath = Environment.getExternalStorageDirectory().toString()
+                                        + File.separator
+                                        + "Download/" + fileNameNoExt + "_auto_removed.png";
+                                File downloadedFile = new File(downloadPath);
+                                BufferedSink sink = Okio.buffer(Okio.sink(downloadedFile));
+                                sink.writeAll(response.body().source());
+                                sink.close();
+                            } else {
+                                System.out.println("Error " + response.code() + " " + response.message());
+                            }
+                        }
+                    });
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }).start();
+
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 

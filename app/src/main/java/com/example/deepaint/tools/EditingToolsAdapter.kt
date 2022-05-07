@@ -57,8 +57,10 @@ class EditingToolsAdapter (private val mOnItemSelected: OnItemSelected) :
     }
 
     init {
-        mToolList.add(ToolModel("Manual Remove", R.drawable.ic_eraser, ToolType.BRUSH))
-        mToolList.add(ToolModel("Auto Segment", R.drawable.ic_gear, ToolType.SEGMENT))
+        mToolList.add(ToolModel("Draw Mask", R.drawable.ic_eraser, ToolType.BRUSH))
+        mToolList.add(ToolModel("Segmentate", R.drawable.ic_segmentate, ToolType.SEGMENT))
+        mToolList.add(ToolModel("Sketch", R.drawable.ic_naruto, ToolType.SKETCH))
+        mToolList.add(ToolModel("Stylize", R.drawable.ic_van_gogh_large, ToolType.STYLIZE))
         // mToolList.add(ToolModel("Text", R.drawable.ic_text, ToolType.TEXT))
         // mToolList.add(ToolModel("Eraser", R.drawable.ic_eraser, ToolType.ERASER))
         // mToolList.add(ToolModel("Filter", R.drawable.ic_photo_filter, ToolType.FILTER))

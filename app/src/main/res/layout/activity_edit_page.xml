@@ -18,16 +18,18 @@
         android:layout_height="wrap_content"
         app:layout_constraintGuide_end="?attr/actionBarSize"
         />
+
     <ja.burhanrashid52.photoeditor.PhotoEditorView
         android:id="@+id/photoEditorView"
         android:layout_width="0dp"
         android:layout_height="0dp"
         app:layout_constraintBottom_toTopOf="@+id/rvConstraintTools"
+        app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:photo_src="@drawable/photobc"
-        >
+        app:layout_constraintVertical_bias="0.0"
+        app:photo_src="@drawable/photobc">
 
     </ja.burhanrashid52.photoeditor.PhotoEditorView>
 
@@ -103,8 +105,8 @@
 -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvConstraintTools"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
+        android:layout_width="343dp"
+        android:layout_height="87dp"
         android:background="@color/tool_bg"
         android:orientation="horizontal"
         android:paddingTop="4dp"
@@ -149,19 +151,6 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/guideline"
         />
-
-    <ImageView
-        android:id="@+id/imgSend"
-        android:layout_width="37dp"
-        android:layout_height="39dp"
-        android:layout_marginTop="9dp"
-        android:background="#99000000"
-        android:foreground="@drawable/ic_facebook"
-        android:padding="8dp"
-        android:src="@drawable/ic_undo"
-        app:layout_constraintEnd_toStartOf="@+id/imgSave"
-        app:layout_constraintStart_toEndOf="@+id/txtCurrentTool"
-        app:layout_constraintTop_toBottomOf="@+id/rvConstraintTools" />
 
     <!-- <ImageView
         android:id="@+id/imageView2"
