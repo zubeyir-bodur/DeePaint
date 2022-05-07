@@ -67,6 +67,7 @@ class EditImageActivity : BaseActivity(), OnPhotoEditorListener, View.OnClickLis
     private var chosenFilePath  = ""
     private var isAutoRemove = false
     private var bitmapMask : Bitmap? = null
+    private var logoWorkspace: ImageView? = null
     var cameraUri : Uri? = null
     private var context = this
     private var fileNameNoExt = ""
@@ -110,11 +111,15 @@ class EditImageActivity : BaseActivity(), OnPhotoEditorListener, View.OnClickLis
 
     @SuppressLint("ClickableViewAccessibility", "MissingPermission")
     private fun initViews() {
+        logoWorkspace = findViewById(R.id.logoWorkspace)
         mPhotoEditorView = findViewById(R.id.photoEditorView)
         mTxtCurrentTool = findViewById(R.id.txtCurrentTool)
         mRvTools = findViewById(R.id.rvConstraintTools)
         mRvFilters = findViewById(R.id.rvFilterView)
         mRootView = findViewById(R.id.rootView)
+
+        // Visibility
+        mTxtCurrentTool!!.visibility = View.INVISIBLE
 
         val imgUndo: ImageView = findViewById(R.id.imgUndo)
         imgUndo.setOnClickListener(this)
@@ -352,6 +357,11 @@ class EditImageActivity : BaseActivity(), OnPhotoEditorListener, View.OnClickLis
                     mPhotoEditorView!!.source.setImageBitmap(bmp)
                     isAutoRemove = false
                 }
+
+
+                mTxtCurrentTool!!.setText(R.string.app_name)
+                mTxtCurrentTool!!.visibility = View.INVISIBLE
+                logoWorkspace!!.visibility = View.VISIBLE
             }
             R.id.imgCamera -> {
                 val cameraIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
@@ -429,6 +439,7 @@ class EditImageActivity : BaseActivity(), OnPhotoEditorListener, View.OnClickLis
                     cursor.moveToFirst()
                     filePath = cursor.getString(index)
                     cursor.close()
+
                     // Split at colon, use second item in the array
                     Log.d("Captured: ", filePath)
                 }
@@ -502,6 +513,8 @@ class EditImageActivity : BaseActivity(), OnPhotoEditorListener, View.OnClickLis
             ToolType.BRUSH -> {
                 mPhotoEditor!!.setBrushDrawingMode(true)
                 mTxtCurrentTool!!.setText(R.string.label_draw_mask)
+                mTxtCurrentTool!!.visibility = View.VISIBLE
+                logoWorkspace!!.visibility = View.INVISIBLE
                 mPropertiesBSFragment!!.show(
                         getSupportFragmentManager(),
                         mPropertiesBSFragment!!.getTag()
@@ -532,6 +545,8 @@ class EditImageActivity : BaseActivity(), OnPhotoEditorListener, View.OnClickLis
             )
             ToolType.SEGMENT -> {
                 mTxtCurrentTool!!.setText(R.string.label_segmentate)
+                mTxtCurrentTool!!.visibility = View.VISIBLE
+                logoWorkspace!!.visibility = View.INVISIBLE
                 Log.d("segment", "clicked")
                 Log.d("ChosenFilepath", chosenFilePath)
                 val fileName = chosenFilePath.substring(chosenFilePath.lastIndexOf(File.separator)+1)
@@ -583,9 +598,15 @@ class EditImageActivity : BaseActivity(), OnPhotoEditorListener, View.OnClickLis
                 },8000)
             }
             ToolType.SKETCH -> {
+                mTxtCurrentTool!!.setText(R.string.label_sketch)
+                mTxtCurrentTool!!.visibility = View.VISIBLE
+                logoWorkspace!!.visibility = View.INVISIBLE
                 drawingProcess()
             }
             ToolType.STYLIZE -> {
+                mTxtCurrentTool!!.setText(R.string.label_stylize)
+                mTxtCurrentTool!!.visibility = View.VISIBLE
+                logoWorkspace!!.visibility = View.INVISIBLE
                 // TODO
                 //  1 - Open gallery again, but save the original image path
                 //  2 - Send a stylizing request with target image as old path

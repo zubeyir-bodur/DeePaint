@@ -3,6 +3,8 @@
 
     <string name="label_draw_mask">Draw Mask</string>
     <string name="label_segmentate">Segmentate</string>
+    <string name="label_sketch">Sketch</string>
+    <string name="label_stylize">Stylize</string>
     <string name="label_shape">Shape</string>
     <string name="label_oval">Oval</string>
     <string name="label_rectangle">Rectangle</string>
