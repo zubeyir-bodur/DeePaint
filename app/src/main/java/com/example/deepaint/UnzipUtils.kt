@@ -1,5 +1,6 @@
 package com.example.deepaint
 
+import android.util.Log
 import java.io.*
 import java.util.zip.ZipFile
 
@@ -55,7 +56,30 @@ object UnzipUtils {
      */
     @Throws(IOException::class)
     private fun extractFile(inputStream: InputStream, destFilePath: String) {
-        val bos = BufferedOutputStream(FileOutputStream(destFilePath))
+
+        var destFilePathOut : String = ""
+        val length = destFilePath.length
+        var dotCount = 0
+        var wrong = false
+        for (i in 0 until length) {
+            if (destFilePath[i] == '.') {
+                dotCount++
+            }
+            if (dotCount > 1) {
+                wrong = true
+                break
+            }
+        }
+        if (dotCount != 1) {
+            var lastDotIndex = destFilePath.lastIndexOf('.')
+            var noExtPath = destFilePath.substring(0, lastDotIndex)
+            var firstDotIndex = noExtPath.lastIndexOf('.')
+            destFilePathOut = destFilePath.substring(0, firstDotIndex) + destFilePath.substring(firstDotIndex + 1, length)
+            Log.d("This will be the actual fileName", destFilePathOut)
+        } else {
+            destFilePathOut = destFilePath
+        }
+        val bos = BufferedOutputStream(FileOutputStream(destFilePathOut))
         val bytesIn = ByteArray(BUFFER_SIZE)
         var read: Int
         while (inputStream.read(bytesIn).also { read = it } != -1) {

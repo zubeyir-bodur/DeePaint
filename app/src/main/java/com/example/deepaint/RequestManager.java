@@ -21,7 +21,7 @@ public class RequestManager {
         try {
             new Thread(() -> {
                 try {
-                    String requestUrl = "https://2327-34-78-61-205.ngrok.io/drawings";
+                    String requestUrl = "https://1fa5-35-239-115-66.ngrok.io/drawings";
                     final OkHttpClient client = new OkHttpClient.Builder()
                             .build();
                     ByteArrayOutputStream stream = new ByteArrayOutputStream();
@@ -76,7 +76,7 @@ public class RequestManager {
         try {
             new Thread(() -> {
                 try {
-                    String requestUrl = "https://0d62-34-134-235-96.ngrok.io/deepfill";
+                    String requestUrl = "https://4685-104-199-191-192.ngrok.io/deepfill";
                     final OkHttpClient client = new OkHttpClient.Builder()
                             .build();
                     ByteArrayOutputStream stream1 = new ByteArrayOutputStream();
@@ -136,7 +136,7 @@ public class RequestManager {
         try {
             new Thread(() -> {
                 try {
-                    String requestUrl = "https://7ab6-35-221-228-167.ngrok.io/segmentate";
+                    String requestUrl = "https://c20b-35-245-167-9.ngrok.io/segmentate";
                     final OkHttpClient client = new OkHttpClient.Builder()
                             .build();
                     ByteArrayOutputStream stream = new ByteArrayOutputStream();
@@ -190,7 +190,7 @@ public class RequestManager {
         try {
             new Thread(() -> {
                 try {
-                    String requestUrl = "https://4671-34-134-235-96.ngrok.io/deepfillauto";
+                    String requestUrl = "https://4685-104-199-191-192.ngrok.io/deepfillauto";
                     final OkHttpClient client = new OkHttpClient.Builder()
                             .build();
                     ByteArrayOutputStream stream1 = new ByteArrayOutputStream();
@@ -231,6 +231,67 @@ public class RequestManager {
                                 String downloadPath = Environment.getExternalStorageDirectory().toString()
                                         + File.separator
                                         + "Download/" + fileNameNoExt + "_auto_removed.png";
+                                File downloadedFile = new File(downloadPath);
+                                BufferedSink sink = Okio.buffer(Okio.sink(downloadedFile));
+                                sink.writeAll(response.body().source());
+                                sink.close();
+                            } else {
+                                System.out.println("Error " + response.code() + " " + response.message());
+                            }
+                        }
+                    });
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }).start();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void sendStyleRequest(Bitmap bitmapTarget, Bitmap bitmapStyle, String fileNameTarget, String fileNameStyle) {
+        System.out.println("Style request...");
+        try {
+            new Thread(() -> {
+                try {
+                    String requestUrl = "https://5dcc-34-122-135-47.ngrok.io/style_transfer";
+                    final OkHttpClient client = new OkHttpClient.Builder()
+                            .build();
+                    ByteArrayOutputStream stream1 = new ByteArrayOutputStream();
+                    bitmapTarget.compress(Bitmap.CompressFormat.PNG, 100, stream1);
+                    ByteArrayOutputStream stream2 = new ByteArrayOutputStream();
+                    bitmapStyle.compress(Bitmap.CompressFormat.PNG, 100, stream2);
+                    byte[] byteArray1 = stream1.toByteArray();
+                    byte[] byteArray2 = stream2.toByteArray();
+                    RequestBody requestBody = new MultipartBody.Builder()
+                            .setType(MultipartBody.FORM)
+                            .addFormDataPart("img.png", fileNameTarget,
+                                    RequestBody.create(MediaType.parse("image/png"), byteArray1))
+                            .addFormDataPart("style.png", fileNameStyle,
+                                    RequestBody.create(MediaType.parse("image/png"), byteArray2))
+                            .build();
+
+                    Request request = new Request.Builder()
+                            .url(requestUrl)
+                            .post(requestBody)
+                            .build();
+
+                    client.newCall(request).enqueue(new Callback() {
+                        @Override
+                        public void onFailure(Call call, IOException e) {
+                            System.out.println("Request Failed");
+                        }
+
+                        @Override
+                        public void onResponse(Call call, Response response) throws IOException {
+                            if (response.code() == 200) {
+                                System.out.println("Request Success");
+                                String fileNameNoExt = fileNameTarget.substring(0, fileNameTarget.lastIndexOf('.'));
+                                String styleNameNoExt = fileNameStyle.substring(0, fileNameStyle.lastIndexOf('.'));
+                                String downloadPath = Environment.getExternalStorageDirectory().toString()
+                                        + File.separator
+                                        + "Download/" + fileNameNoExt + "_styled_with" + styleNameNoExt + ".png";
                                 File downloadedFile = new File(downloadPath);
                                 BufferedSink sink = Okio.buffer(Okio.sink(downloadedFile));
                                 sink.writeAll(response.body().source());

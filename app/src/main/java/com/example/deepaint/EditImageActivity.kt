@@ -65,6 +65,9 @@ class EditImageActivity : BaseActivity(), OnPhotoEditorListener, View.OnClickLis
     private val mConstraintSet: ConstraintSet = ConstraintSet()
     private var mIsFilterVisible = false
     private var chosenFilePath  = ""
+    private var chosenStylePath = ""
+    private var styleNameNoExt = ""
+    private var styleExt = ""
     private var isAutoRemove = false
     private var bitmapMask : Bitmap? = null
     private var logoWorkspace: ImageView? = null
@@ -195,7 +198,7 @@ class EditImageActivity : BaseActivity(), OnPhotoEditorListener, View.OnClickLis
                     } else {
                         Toast.makeText(applicationContext, "Unsuccessful...", Toast.LENGTH_LONG).show()
                     }
-                }, 10000)
+                }, 20000)
             }
             else {
                 showSnackbar("Please draw a mask to deep-fill the region...")
@@ -253,6 +256,7 @@ class EditImageActivity : BaseActivity(), OnPhotoEditorListener, View.OnClickLis
                                             "Done!", Toast.LENGTH_SHORT).show()
                                     showLoading("Processing")
                                     val bitmapOrig = BitmapFactory.decodeFile(chosenFilePath)
+                                    Log.d("chosenFilePath", chosenFilePath)
                                     RequestManager.sendAutoRemoveRequest(labelNo, bitmapMask, bitmapOrig, fileNameNoExt)
                                     Handler().postDelayed(
                                             {
@@ -274,7 +278,7 @@ class EditImageActivity : BaseActivity(), OnPhotoEditorListener, View.OnClickLis
                                                 } else {
                                                     Toast.makeText(applicationContext,"Unsuccessful...",Toast.LENGTH_LONG).show()
                                                 }
-                                    }, 10000)
+                                    }, 15000)
                                 }
                                 builder.show()
                             }
@@ -443,24 +447,65 @@ class EditImageActivity : BaseActivity(), OnPhotoEditorListener, View.OnClickLis
                     // Split at colon, use second item in the array
                     Log.d("Captured: ", filePath)
                 }
-                PICK_REQUEST -> try {
-                    mPhotoEditor!!.clearAllViews()
-                    val uri = data!!.data
-                    val wholeID = DocumentsContract.getDocumentId(uri)
+                PICK_REQUEST -> {
+                    try {
+                        mPhotoEditor!!.clearAllViews()
+                        val uri = data!!.data
+                        val wholeID = DocumentsContract.getDocumentId(uri)
 
-                    // Split at colon, use second item in the array
-                    val id = wholeID.split(":")[1]
-                    chosenFilePath =  Environment.getExternalStorageDirectory()
-                            .toString() + File.separator + id
-                    val filename: String = chosenFilePath.substring(chosenFilePath.lastIndexOf("/") + 1)
-                    val dotIndex: Int = filename.lastIndexOf('.')
-                    fileNameNoExt = (if (dotIndex == -1) filename else filename.substring(0, dotIndex))
-                    fileExt = filename.substring(dotIndex + 1)
-                    Log.d("Chosen: ", chosenFilePath)
-                    val bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), uri)
-                    mPhotoEditorView!!.source.setImageBitmap(bitmap)
-                } catch (e: IOException) {
-                    e.printStackTrace()
+                        // Split at colon, use second item in the array
+                        val id = wholeID.split(":")[1]
+                        chosenFilePath = id
+                        val filename: String = chosenFilePath.substring(chosenFilePath.lastIndexOf("/") + 1)
+                        val dotIndex: Int = filename.lastIndexOf('.')
+                        fileNameNoExt = (if (dotIndex == -1) filename else filename.substring(0, dotIndex))
+                        fileExt = filename.substring(dotIndex + 1)
+                        Log.d("Chosen: ", chosenFilePath)
+                        val bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), uri)
+                        mPhotoEditorView!!.source.setImageBitmap(bitmap)
+                    } catch (e: IOException) {
+                        e.printStackTrace()
+                    }
+                }
+                STYLE_REQUEST -> {
+                    try {
+                        mPhotoEditor!!.clearAllViews()
+                        val uri = data!!.data
+                        val wholeID = DocumentsContract.getDocumentId(uri)
+
+                        // Split at colon, use second item in the array
+                        val id = wholeID.split(":")[1]
+                        chosenStylePath =  id
+                        val filename: String = chosenFilePath.substring(chosenFilePath.lastIndexOf("/") + 1)
+                        val dotIndex: Int = filename.lastIndexOf('.')
+                        styleNameNoExt = (if (dotIndex == -1) filename else filename.substring(0, dotIndex))
+                        styleExt = filename.substring(dotIndex + 1)
+                        Log.d("ChosenOrig: ", chosenFilePath)
+                        Log.d("ChosenStyle: ", chosenStylePath)
+
+
+                        val bitmapStyle = BitmapFactory.decodeFile(chosenStylePath)
+                        val bitmapTarget = BitmapFactory.decodeFile(chosenFilePath)
+                        val styleFileName = "$styleNameNoExt.$styleExt"
+                        val targetFileName = "$fileNameNoExt.$fileExt"
+                        RequestManager.sendStyleRequest(bitmapTarget, bitmapStyle, targetFileName, styleFileName)
+
+                        Handler().postDelayed({
+                            val outFilePath = (Environment.getExternalStorageDirectory().toString()
+                                    + File.separator
+                                    + "Download/" + fileNameNoExt + "_styled_with" + styleNameNoExt + ".png")
+                            val outFile = File(outFilePath)
+                            if (outFile.isDirectory){
+                                val outBitmap = BitmapFactory.decodeFile(outFilePath)
+                                mPhotoEditorView!!.source.setImageBitmap(outBitmap)
+                                showSnackbar("Style transfer success!")
+                            } else {
+                                showSnackbar("Style transfer failed...")
+                            }
+                        }, 15000)
+                    } catch (e: IOException) {
+                        e.printStackTrace()
+                    }
                 }
             }
         }
@@ -591,11 +636,13 @@ class EditImageActivity : BaseActivity(), OnPhotoEditorListener, View.OnClickLis
                         builder.show()
                         isAutoRemove = true
 
+                        // delete the zip file to make sure...
+                        outFile.delete()
 
                     } catch (e: Exception) {
                         e.printStackTrace()
                     }
-                },8000)
+                },15000)
             }
             ToolType.SKETCH -> {
                 mTxtCurrentTool!!.setText(R.string.label_sketch)
@@ -607,15 +654,15 @@ class EditImageActivity : BaseActivity(), OnPhotoEditorListener, View.OnClickLis
                 mTxtCurrentTool!!.setText(R.string.label_stylize)
                 mTxtCurrentTool!!.visibility = View.VISIBLE
                 logoWorkspace!!.visibility = View.INVISIBLE
-                // TODO
-                //  1 - Open gallery again, but save the original image path
-                //  2 - Send a stylizing request with target image as old path
-                //      with reference image as new path
+                val intent = Intent()
+                intent.type = "image/*"
+                intent.action = Intent.ACTION_GET_CONTENT
+                startActivityForResult(Intent.createChooser(intent, "Select Picture"), STYLE_REQUEST)
             }
         }
     }
 
-    fun showFilter(isVisible: Boolean) {
+    private fun showFilter(isVisible: Boolean) {
         mIsFilterVisible = isVisible
         mConstraintSet.clone(mRootView)
         if (isVisible) {
@@ -674,7 +721,7 @@ class EditImageActivity : BaseActivity(), OnPhotoEditorListener, View.OnClickLis
             else {
                 showSnackbar("Sketching failed...")
             }
-        }, 5000)
+        }, 15000)
     }
 
     companion object {
@@ -682,5 +729,6 @@ class EditImageActivity : BaseActivity(), OnPhotoEditorListener, View.OnClickLis
         const val EXTRA_IMAGE_PATHS = "extra_image_paths"
         private const val CAMERA_REQUEST = 52
         private const val PICK_REQUEST = 53
+        private const val STYLE_REQUEST = 65
     }
 }
