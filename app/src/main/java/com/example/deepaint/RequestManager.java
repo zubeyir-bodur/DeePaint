@@ -25,7 +25,7 @@ public class RequestManager {
         try {
             new Thread(() -> {
                 try {
-                    String requestUrl = "https://f375-34-91-214-233.ngrok.io/drawings";
+                    String requestUrl = "https://5e98-34-90-67-150.ngrok.io/drawings";
                     final OkHttpClient client = new OkHttpClient.Builder()
                             .build();
                     ByteArrayOutputStream stream = new ByteArrayOutputStream();
@@ -80,7 +80,7 @@ public class RequestManager {
         try {
             new Thread(() -> {
                 try {
-                    String requestUrl = "https://608f-34-83-212-48.ngrok.io/deepfill";
+                    String requestUrl = "https://de79-35-192-104-184.ngrok.io/deepfill";
                     final OkHttpClient client = new OkHttpClient.Builder()
                             .build();
                     ByteArrayOutputStream stream1 = new ByteArrayOutputStream();
@@ -140,7 +140,7 @@ public class RequestManager {
         try {
             new Thread(() -> {
                 try {
-                    String requestUrl = "https://7ab6-35-221-228-167.ngrok.io/segmentate";
+                    String requestUrl = "https://bd1f-34-105-127-19.ngrok.io/segmentate";
                     final OkHttpClient client = new OkHttpClient.Builder()
                             .build();
                     ByteArrayOutputStream stream = new ByteArrayOutputStream();
@@ -194,7 +194,7 @@ public class RequestManager {
         try {
             new Thread(() -> {
                 try {
-                    String requestUrl = "https://608f-34-83-212-48.ngrok.io/deepfillauto";
+                    String requestUrl = "https://de79-35-192-104-184.ngrok.io/deepfillauto";
                     final OkHttpClient client = new OkHttpClient.Builder()
                             .build();
                     ByteArrayOutputStream stream1 = new ByteArrayOutputStream();
@@ -259,13 +259,14 @@ public class RequestManager {
         try {
             new Thread(() -> {
                 try {
-                    String requestUrl = "https://5dcc-34-122-135-47.ngrok.io/style_transfer";
+
+                    String requestUrl = "https://34d1-104-155-217-6.ngrok.io/style_transfer";
                     final OkHttpClient client = new OkHttpClient.Builder()
                             .build();
                     ByteArrayOutputStream stream1 = new ByteArrayOutputStream();
-                    bitmapTarget.compress(Bitmap.CompressFormat.PNG, 100, stream1);
+                    bitmapTarget.compress(Bitmap.CompressFormat.JPEG, 100, stream1);
                     ByteArrayOutputStream stream2 = new ByteArrayOutputStream();
-                    bitmapStyle.compress(Bitmap.CompressFormat.PNG, 100, stream2);
+                    bitmapStyle.compress(Bitmap.CompressFormat.JPEG, 100, stream2);
                     byte[] byteArray1 = stream1.toByteArray();
                     byte[] byteArray2 = stream2.toByteArray();
                     RequestBody requestBody = new MultipartBody.Builder()
@@ -295,7 +296,7 @@ public class RequestManager {
                                 String styleNameNoExt = fileNameStyle.substring(0, fileNameStyle.lastIndexOf('.'));
                                 String downloadPath = Environment.getExternalStorageDirectory().toString()
                                         + File.separator
-                                        + "Download/" + fileNameNoExt + "_styled_with" + styleNameNoExt + ".png";
+                                        + "Download/" + fileNameNoExt + "_styled.png";
                                 File downloadedFile = new File(downloadPath);
                                 BufferedSink sink = Okio.buffer(Okio.sink(downloadedFile));
                                 sink.writeAll(response.body().source());

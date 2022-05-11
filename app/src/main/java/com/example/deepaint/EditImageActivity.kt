@@ -199,7 +199,7 @@ class EditImageActivity : BaseActivity(), OnPhotoEditorListener, View.OnClickLis
                     } else {
                         Toast.makeText(applicationContext, "Unsuccessful...", Toast.LENGTH_LONG).show()
                     }
-                }, 10000)
+                }, 15000)
             }
             else {
                 showSnackbar("Please draw a mask to deep-fill the region...")
@@ -279,7 +279,7 @@ class EditImageActivity : BaseActivity(), OnPhotoEditorListener, View.OnClickLis
                                                 } else {
                                                     Toast.makeText(applicationContext,"Unsuccessful...",Toast.LENGTH_LONG).show()
                                                 }
-                                            }, 10000)
+                                            }, 15000)
                                     }
                                     builder.show()
                                 }
@@ -478,24 +478,27 @@ class EditImageActivity : BaseActivity(), OnPhotoEditorListener, View.OnClickLis
 
                         val bitmapStyle = BitmapFactory.decodeFile(chosenStylePath)
                         val bitmapTarget = BitmapFactory.decodeFile(chosenFilePath)
-                        val styleFileName = "$styleNameNoExt.$styleExt"
+                        var styleFileName = "$styleNameNoExt.$styleExt"
                         val targetFileName = "$fileNameNoExt.$fileExt"
+                        styleFileName = "style_.png"
                         RequestManager.sendStyleRequest(bitmapTarget, bitmapStyle, targetFileName, styleFileName)
                         showLoading("Processing")
                         Handler().postDelayed({
+                            styleNameNoExt = "style_"
                             hideLoading()
                             val outFilePath = (Environment.getExternalStorageDirectory().toString()
                                     + File.separator
-                                    + "Download/" + fileNameNoExt + "_styled_with" + styleNameNoExt + ".png")
+                                    + "Download/" + fileNameNoExt + "_styled.png")
                             val outFile = File(outFilePath)
-                            if (outFile.isDirectory){
+                            if (outFile.isFile){
                                 val outBitmap = BitmapFactory.decodeFile(outFilePath)
                                 mPhotoEditorView!!.source.setImageBitmap(outBitmap)
                                 showSnackbar("Style transfer success!")
                             } else {
+                                Log.d("path", outFilePath)
                                 showSnackbar("Style transfer failed...")
                             }
-                        }, 15000)
+                        }, 25000)
                     } catch (e: IOException) {
                         e.printStackTrace()
                     }
@@ -582,6 +585,8 @@ class EditImageActivity : BaseActivity(), OnPhotoEditorListener, View.OnClickLis
                     mStickerBSFragment!!.getTag()
             )
             ToolType.SEGMENT -> {
+
+                mPhotoEditor!!.setBrushDrawingMode(false)
                 mTxtCurrentTool!!.setText(R.string.label_segmentate)
                 mTxtCurrentTool!!.visibility = View.VISIBLE
                 logoWorkspace!!.visibility = View.INVISIBLE
@@ -636,7 +641,7 @@ class EditImageActivity : BaseActivity(), OnPhotoEditorListener, View.OnClickLis
                     } catch (e: Exception) {
                         e.printStackTrace()
                     }
-                },8000)
+                },15000)
             }
             ToolType.SKETCH -> {
                 mTxtCurrentTool!!.setText(R.string.label_sketch)
@@ -715,7 +720,7 @@ class EditImageActivity : BaseActivity(), OnPhotoEditorListener, View.OnClickLis
             else {
                 showSnackbar("Sketching failed...")
             }
-        }, 5000)
+        }, 15000)
     }
 
     private fun getAbstolutePathFromUri(uri : Uri) : String {
