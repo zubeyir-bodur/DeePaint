@@ -29,6 +29,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.graphics.drawable.toBitmap
+import androidx.documentfile.provider.DocumentFile
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.transition.ChangeBounds
@@ -68,6 +69,9 @@ class EditImageActivity : BaseActivity(), OnPhotoEditorListener, View.OnClickLis
     private var isAutoRemove = false
     private var bitmapMask : Bitmap? = null
     private var logoWorkspace: ImageView? = null
+    private var chosenStylePath = ""
+    private var styleNameNoExt = ""
+    private var styleExt = ""
     var cameraUri : Uri? = null
     private var context = this
     private var fileNameNoExt = ""
@@ -237,24 +241,25 @@ class EditImageActivity : BaseActivity(), OnPhotoEditorListener, View.OnClickLis
                                 val labelColor = bitmapMask!!.getPixel(relative_img_x, relative_img_Y)
                                 Log.d("Label Color Value in 32 bits", labelColor.toString())
                                 val labelHex = Integer.toHexString(labelColor)
-                                var labelString = labelHex.substring(6, 8)
-                                var labelNo = Integer.decode(labelString[0].toString()) * 16 + Integer.decode(labelString[1].toString())
+                                val labelString = labelHex.substring(6, 8)
+                                val labelNo = Integer.decode(labelString[0].toString()) * 16 + Integer.decode(labelString[1].toString())
                                 Log.d("Label No", labelNo.toString())
-
-                                val builder = AlertDialog.Builder(context)
-                                builder.setTitle("Proceed?")
-                                builder.setMessage("Are you sore? The object that you have selected will be removed from the image")
-                                builder.setNegativeButton("Re-select") {dialog, which ->
-                                    Toast.makeText(applicationContext,
+                                // If the background is selected, ignore
+                                if (labelNo != 0) {
+                                    val builder = AlertDialog.Builder(context)
+                                    builder.setTitle("Proceed?")
+                                    builder.setMessage("Are you sore? The object that you have selected will be removed from the image")
+                                    builder.setNegativeButton("Re-select") {dialog, which ->
+                                        Toast.makeText(applicationContext,
                                             "Re-selecting...", Toast.LENGTH_SHORT).show()
-                                }
-                                builder.setPositiveButton("Yes") { dialog, which ->
-                                    Toast.makeText(applicationContext,
+                                    }
+                                    builder.setPositiveButton("Yes") { dialog, which ->
+                                        Toast.makeText(applicationContext,
                                             "Done!", Toast.LENGTH_SHORT).show()
-                                    showLoading("Processing")
-                                    val bitmapOrig = BitmapFactory.decodeFile(chosenFilePath)
-                                    RequestManager.sendAutoRemoveRequest(labelNo, bitmapMask, bitmapOrig, fileNameNoExt)
-                                    Handler().postDelayed(
+                                        showLoading("Processing")
+                                        val bitmapOrig = BitmapFactory.decodeFile(chosenFilePath)
+                                        RequestManager.sendAutoRemoveRequest(labelNo, bitmapMask, bitmapOrig, fileNameNoExt)
+                                        Handler().postDelayed(
                                             {
                                                 hideLoading()
                                                 val removedPath = (Environment.getExternalStorageDirectory().toString()
@@ -274,9 +279,10 @@ class EditImageActivity : BaseActivity(), OnPhotoEditorListener, View.OnClickLis
                                                 } else {
                                                     Toast.makeText(applicationContext,"Unsuccessful...",Toast.LENGTH_LONG).show()
                                                 }
-                                    }, 10000)
+                                            }, 10000)
+                                    }
+                                    builder.show()
                                 }
-                                builder.show()
                             }
                         }
                         return true
@@ -375,7 +381,7 @@ class EditImageActivity : BaseActivity(), OnPhotoEditorListener, View.OnClickLis
             R.id.imgGallery -> {
                 val intent = Intent()
                 intent.type = "image/*"
-                intent.action = Intent.ACTION_GET_CONTENT
+                intent.action = Intent.ACTION_OPEN_DOCUMENT
                 startActivityForResult(Intent.createChooser(intent, "Select Picture"), PICK_REQUEST)
             }
         }
@@ -446,12 +452,7 @@ class EditImageActivity : BaseActivity(), OnPhotoEditorListener, View.OnClickLis
                 PICK_REQUEST -> try {
                     mPhotoEditor!!.clearAllViews()
                     val uri = data!!.data
-                    val wholeID = DocumentsContract.getDocumentId(uri)
-
-                    // Split at colon, use second item in the array
-                    val id = wholeID.split(":")[1]
-                    chosenFilePath =  Environment.getExternalStorageDirectory()
-                            .toString() + File.separator + id
+                    chosenFilePath =  getAbstolutePathFromUri(uri!!)
                     val filename: String = chosenFilePath.substring(chosenFilePath.lastIndexOf("/") + 1)
                     val dotIndex: Int = filename.lastIndexOf('.')
                     fileNameNoExt = (if (dotIndex == -1) filename else filename.substring(0, dotIndex))
@@ -461,6 +462,43 @@ class EditImageActivity : BaseActivity(), OnPhotoEditorListener, View.OnClickLis
                     mPhotoEditorView!!.source.setImageBitmap(bitmap)
                 } catch (e: IOException) {
                     e.printStackTrace()
+                }
+                STYLE_REQUEST -> {
+                    try {
+                        mPhotoEditor!!.clearAllViews()
+                        val uri = data!!.data
+                        chosenStylePath = getAbstolutePathFromUri(uri!!)
+                        val filename: String = chosenFilePath.substring(chosenFilePath.lastIndexOf("/") + 1)
+                        val dotIndex: Int = filename.lastIndexOf('.')
+                        styleNameNoExt = (if (dotIndex == -1) filename else filename.substring(0, dotIndex))
+                        styleExt = filename.substring(dotIndex + 1)
+                        Log.d("ChosenOrig: ", chosenFilePath)
+                        Log.d("ChosenStyle: ", chosenStylePath)
+
+
+                        val bitmapStyle = BitmapFactory.decodeFile(chosenStylePath)
+                        val bitmapTarget = BitmapFactory.decodeFile(chosenFilePath)
+                        val styleFileName = "$styleNameNoExt.$styleExt"
+                        val targetFileName = "$fileNameNoExt.$fileExt"
+                        RequestManager.sendStyleRequest(bitmapTarget, bitmapStyle, targetFileName, styleFileName)
+                        showLoading("Processing")
+                        Handler().postDelayed({
+                            hideLoading()
+                            val outFilePath = (Environment.getExternalStorageDirectory().toString()
+                                    + File.separator
+                                    + "Download/" + fileNameNoExt + "_styled_with" + styleNameNoExt + ".png")
+                            val outFile = File(outFilePath)
+                            if (outFile.isDirectory){
+                                val outBitmap = BitmapFactory.decodeFile(outFilePath)
+                                mPhotoEditorView!!.source.setImageBitmap(outBitmap)
+                                showSnackbar("Style transfer success!")
+                            } else {
+                                showSnackbar("Style transfer failed...")
+                            }
+                        }, 15000)
+                    } catch (e: IOException) {
+                        e.printStackTrace()
+                    }
                 }
             }
         }
@@ -565,33 +603,36 @@ class EditImageActivity : BaseActivity(), OnPhotoEditorListener, View.OnClickLis
                                 + "Download/" + fileNameNoExt + "_segmentation.zip")
                         val outFile : File = File(outFilePath)
                         Log.d("Does the zip file Exist? ", outFile.isFile().toString())
-                        UnzipUtils.unzip(outFile, (Environment.getExternalStorageDirectory().toString()
-                                + File.separator
-                                + "Download"))
-                        // mPhotoEditorView!!.source.setImageURI(Uri.fromFile(File(outFilePath)))
-                        val predFile : File = File((Environment.getExternalStorageDirectory().toString()
-                                + File.separator
-                                + "Download/${fileNameNoExt}_pred.png"))
-                        val maskFile : File = File((Environment.getExternalStorageDirectory().toString()
-                                + File.separator
-                                + "Download/${fileNameNoExt}_pred_masks.png"))
-                        var bitmapPred = BitmapFactory.decodeFile(predFile.absolutePath)
-                        // chosenFilePath = predFile.absolutePath
-                        mPhotoEditorView!!.source.setImageBitmap(bitmapPred)
-                        bitmapMask = BitmapFactory.decodeFile(maskFile.absolutePath)
+                        if (outFile.isFile) {
+
+                            UnzipUtils.unzip(outFile, (Environment.getExternalStorageDirectory().toString()
+                                    + File.separator
+                                    + "Download"))
+                            // mPhotoEditorView!!.source.setImageURI(Uri.fromFile(File(outFilePath)))
+                            val predFile : File = File((Environment.getExternalStorageDirectory().toString()
+                                    + File.separator
+                                    + "Download/${fileNameNoExt}_pred.png"))
+                            val maskFile : File = File((Environment.getExternalStorageDirectory().toString()
+                                    + File.separator
+                                    + "Download/${fileNameNoExt}_pred_masks.png"))
+                            var bitmapPred = BitmapFactory.decodeFile(predFile.absolutePath)
+                            // chosenFilePath = predFile.absolutePath
+                            mPhotoEditorView!!.source.setImageBitmap(bitmapPred)
+                            bitmapMask = BitmapFactory.decodeFile(maskFile.absolutePath)
 
 
-                        val builder = AlertDialog.Builder(this)
-                        builder.setTitle("Automatic Object Removal Beta!")
-                        builder.setMessage("Please select a painted region to remove it.")
-                        builder.setNeutralButton("Got It!") { dialog, which ->
-                            Toast.makeText(applicationContext,
+                            val builder = AlertDialog.Builder(this)
+                            builder.setTitle("Automatic Object Removal Beta!")
+                            builder.setMessage("Please select a painted region to remove it.")
+                            builder.setNeutralButton("Got It!") { dialog, which ->
+                                Toast.makeText(applicationContext,
                                     "Got It!", Toast.LENGTH_SHORT).show()
+                            }
+                            builder.show()
+                            isAutoRemove = true
+                        } else {
+                            showSnackbar("The segmentation was not successful...")
                         }
-                        builder.show()
-                        isAutoRemove = true
-
-
                     } catch (e: Exception) {
                         e.printStackTrace()
                     }
@@ -607,10 +648,10 @@ class EditImageActivity : BaseActivity(), OnPhotoEditorListener, View.OnClickLis
                 mTxtCurrentTool!!.setText(R.string.label_stylize)
                 mTxtCurrentTool!!.visibility = View.VISIBLE
                 logoWorkspace!!.visibility = View.INVISIBLE
-                // TODO
-                //  1 - Open gallery again, but save the original image path
-                //  2 - Send a stylizing request with target image as old path
-                //      with reference image as new path
+                val intent = Intent()
+                intent.type = "image/*"
+                intent.action = Intent.ACTION_GET_CONTENT
+                startActivityForResult(Intent.createChooser(intent, "Select Picture"), STYLE_REQUEST)
             }
         }
     }
@@ -677,10 +718,20 @@ class EditImageActivity : BaseActivity(), OnPhotoEditorListener, View.OnClickLis
         }, 5000)
     }
 
+    private fun getAbstolutePathFromUri(uri : Uri) : String {
+        // Assume that all of the files are chosen from the Download directory only...
+        val fileName = DocumentFile.fromSingleUri(context, uri!!)?.name.toString()
+
+        return Environment.getExternalStorageDirectory()
+            // .toString() + File.separator + id - why did it stop working in an instant???
+            .toString() + File.separator + "Download" + File.separator + fileName
+    }
+
     companion object {
         private val TAG = EditImageActivity::class.java.simpleName
         const val EXTRA_IMAGE_PATHS = "extra_image_paths"
         private const val CAMERA_REQUEST = 52
         private const val PICK_REQUEST = 53
+        private const val STYLE_REQUEST = 65
     }
 }
