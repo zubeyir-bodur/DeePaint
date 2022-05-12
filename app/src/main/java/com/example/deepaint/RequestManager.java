@@ -77,59 +77,62 @@ public class RequestManager {
 
     public static void sendDeepFillRequest(Bitmap d1, String fileName1, Bitmap d2, String fileName2) {
         System.out.println("Deep Fill request...");
+        /*
         try {
-            new Thread(() -> {
-                try {
-                    String requestUrl = "https://de79-35-192-104-184.ngrok.io/deepfill";
-                    final OkHttpClient client = new OkHttpClient.Builder()
-                            .build();
-                    ByteArrayOutputStream stream1 = new ByteArrayOutputStream();
-                    d1.compress(Bitmap.CompressFormat.PNG, 100, stream1);
-                    ByteArrayOutputStream stream2 = new ByteArrayOutputStream();
-                    d2.compress(Bitmap.CompressFormat.PNG, 100, stream2);
-                    byte[] byteArray1 = stream1.toByteArray();
-                    byte[] byteArray2 = stream2.toByteArray();
-                    RequestBody requestBody = new MultipartBody.Builder()
-                            .setType(MultipartBody.FORM)
-                            .addFormDataPart("img.png", fileName1,
-                                    RequestBody.create(MediaType.parse("image/png"), byteArray1))
-                            .addFormDataPart("mask.png", fileName2,
-                                    RequestBody.create(MediaType.parse("image/png"), byteArray2))
-                            .build();
+            Thread thread = new Thread(() -> {
 
-                    Request request = new Request.Builder()
-                            .url(requestUrl)
-                            .post(requestBody)
-                            .build();
+            });
+            thread.start();
+            thread.join();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }*/
+        try {
+            String requestUrl = "https://5054-34-75-150-162.ngrok.io/deepfill";
+            final OkHttpClient client = new OkHttpClient.Builder()
+                    .build();
+            ByteArrayOutputStream stream1 = new ByteArrayOutputStream();
+            d1.compress(Bitmap.CompressFormat.JPEG, 100, stream1);
+            ByteArrayOutputStream stream2 = new ByteArrayOutputStream();
+            d2.compress(Bitmap.CompressFormat.JPEG, 100, stream2);
+            byte[] byteArray1 = stream1.toByteArray();
+            byte[] byteArray2 = stream2.toByteArray();
+            RequestBody requestBody = new MultipartBody.Builder()
+                    .setType(MultipartBody.FORM)
+                    .addFormDataPart("img.png", fileName1,
+                            RequestBody.create(MediaType.parse("image/png"), byteArray1))
+                    .addFormDataPart("mask.png", fileName2,
+                            RequestBody.create(MediaType.parse("image/png"), byteArray2))
+                    .build();
 
-                    client.newCall(request).enqueue(new Callback() {
-                        @Override
-                        public void onFailure(Call call, IOException e) {
-                            System.out.println("Request Failed");
-                        }
+            Request request = new Request.Builder()
+                    .url(requestUrl)
+                    .post(requestBody)
+                    .build();
 
-                        @Override
-                        public void onResponse(Call call, Response response) throws IOException {
-                            if (response.code() == 200) {
-                                System.out.println("Request Success");
-                                String fileNameNoExt = fileName1.substring(0, fileName1.lastIndexOf('.'));
-                                String downloadPath = Environment.getExternalStorageDirectory().toString()
-                                        + File.separator
-                                        + "Download/" + fileNameNoExt + "_removed.png";
-                                File downloadedFile = new File(downloadPath);
-                                BufferedSink sink = Okio.buffer(Okio.sink(downloadedFile));
-                                sink.writeAll(response.body().source());
-                                sink.close();
-                            } else {
-                                System.out.println("Error " + response.code() + " " + response.message());
-                            }
-                        }
-                    });
-                } catch (Exception e) {
-                    e.printStackTrace();
+            client.newCall(request).enqueue(new Callback() {
+                @Override
+                public void onFailure(Call call, IOException e) {
+                    System.out.println("Request Failed");
                 }
-            }).start();
 
+                @Override
+                public void onResponse(Call call, Response response) throws IOException {
+                    if (response.code() == 200) {
+                        System.out.println("Request Success");
+                        String fileNameNoExt = fileName1.substring(0, fileName1.lastIndexOf('.'));
+                        String downloadPath = Environment.getExternalStorageDirectory().toString()
+                                + File.separator
+                                + "Download/" + fileNameNoExt + "_removed.png";
+                        File downloadedFile = new File(downloadPath);
+                        BufferedSink sink = Okio.buffer(Okio.sink(downloadedFile));
+                        sink.writeAll(response.body().source());
+                        sink.close();
+                    } else {
+                        System.out.println("Error " + response.code() + " " + response.message());
+                    }
+                }
+            });
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -140,7 +143,7 @@ public class RequestManager {
         try {
             new Thread(() -> {
                 try {
-                    String requestUrl = "https://bd1f-34-105-127-19.ngrok.io/segmentate";
+                    String requestUrl = "https://4176-34-143-208-15.ngrok.io/segmentate";
                     final OkHttpClient client = new OkHttpClient.Builder()
                             .build();
                     ByteArrayOutputStream stream = new ByteArrayOutputStream();
@@ -194,13 +197,13 @@ public class RequestManager {
         try {
             new Thread(() -> {
                 try {
-                    String requestUrl = "https://de79-35-192-104-184.ngrok.io/deepfillauto";
+                    String requestUrl = "https://5054-34-75-150-162.ngrok.io/deepfillauto";
                     final OkHttpClient client = new OkHttpClient.Builder()
                             .build();
                     ByteArrayOutputStream stream1 = new ByteArrayOutputStream();
-                    mask.compress(Bitmap.CompressFormat.PNG, 100, stream1);
+                    mask.compress(Bitmap.CompressFormat.JPEG, 100, stream1);
                     ByteArrayOutputStream stream2 = new ByteArrayOutputStream();
-                    mapWithImg.compress(Bitmap.CompressFormat.PNG, 100, stream2);
+                    mapWithImg.compress(Bitmap.CompressFormat.JPEG, 100, stream2);
                     byte[] byteArray1 = stream1.toByteArray();
                     byte[] byteArray2 = stream2.toByteArray();
                     String fileName1 = fileNameNoExt + "_pred_masks.png";
