@@ -25,7 +25,7 @@ public class RequestManager {
         try {
             new Thread(() -> {
                 try {
-                    String requestUrl = "https://f375-34-91-214-233.ngrok.io/drawings";
+                    String requestUrl = "https://e860-35-229-215-245.ngrok.io/drawings";
                     final OkHttpClient client = new OkHttpClient.Builder()
                             .build();
                     ByteArrayOutputStream stream = new ByteArrayOutputStream();
@@ -80,7 +80,7 @@ public class RequestManager {
         try {
             new Thread(() -> {
                 try {
-                    String requestUrl = "https://608f-34-83-212-48.ngrok.io/deepfill";
+                    String requestUrl = "https://d388-35-196-29-41.ngrok.io/deepfill";
                     final OkHttpClient client = new OkHttpClient.Builder()
                             .build();
                     ByteArrayOutputStream stream1 = new ByteArrayOutputStream();
@@ -140,7 +140,8 @@ public class RequestManager {
         try {
             new Thread(() -> {
                 try {
-                    String requestUrl = "https://7ab6-35-221-228-167.ngrok.io/segmentate";
+                    System.out.println("in thread");
+                    String requestUrl = "https://1e1f-34-132-159-186.ngrok.io/segmentate";
                     final OkHttpClient client = new OkHttpClient.Builder()
                             .build();
                     ByteArrayOutputStream stream = new ByteArrayOutputStream();
@@ -156,6 +157,7 @@ public class RequestManager {
                             .url(requestUrl)
                             .post(requestBody)
                             .build();
+                    System.out.println("senginf request");
                     client.newCall(request).enqueue(new Callback() {
                         @Override
                         public void onFailure(Call call, IOException e) {
@@ -194,7 +196,7 @@ public class RequestManager {
         try {
             new Thread(() -> {
                 try {
-                    String requestUrl = "https://608f-34-83-212-48.ngrok.io/deepfillauto";
+                    String requestUrl = "https://d388-35-196-29-41.ngrok.io/deepfillauto";
                     final OkHttpClient client = new OkHttpClient.Builder()
                             .build();
                     ByteArrayOutputStream stream1 = new ByteArrayOutputStream();
@@ -259,7 +261,7 @@ public class RequestManager {
         try {
             new Thread(() -> {
                 try {
-                    String requestUrl = "https://5dcc-34-122-135-47.ngrok.io/style_transfer";
+                    String requestUrl = "https://8c66-35-194-219-79.ngrok.io/style_transfer";
                     final OkHttpClient client = new OkHttpClient.Builder()
                             .build();
                     ByteArrayOutputStream stream1 = new ByteArrayOutputStream();
